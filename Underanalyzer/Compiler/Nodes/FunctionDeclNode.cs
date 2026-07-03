@@ -360,12 +360,12 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
             // Create assignment statement, or a function call to 'variable_struct_set' if the name is not a valid identifier.
             if (!IsValidIdentifier(variable.Text))
             {
-                List<IASTNode> callArgs = new(3)
-                {
+                List<IASTNode> callArgs =
+                [
                     new SimpleFunctionCallNode(VMConstants.SelfFunction, null, []),
                     new StringNode(variable.Text, variable),
                     value
-                };
+                ];
                 SimpleFunctionCallNode callNode = new("variable_struct_set", null, callArgs)
                 {
                     IsStatement = true
@@ -659,21 +659,16 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
             return false;
         }
 
-        char firstChar = name[0];
-        if ((firstChar < 'a' || firstChar > 'z') && 
-            (firstChar < 'A' || firstChar > 'Z') && 
-            firstChar != '_')
+        // Check first character
+        if (name[0] is not (>= 'a' and <= 'z' or >= 'A' and <= 'Z' or '_'))
         {
             return false;
         }
 
+        // Check remaining characters
         for (int i = 1; i < name.Length; i++)
         {
-            char c = name[i];
-            if ((c < 'a' || c > 'z') &&
-                (c < 'A' || c > 'Z') &&
-                (c < '0' || c > '9') &&
-                c != '_')
+            if (name[i] is not (>= 'a' and <= 'z' or >= 'A' and <= 'Z' or >= '0' and <= '9' or '_'))
             {
                 return false;
             }
