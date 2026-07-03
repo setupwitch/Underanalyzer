@@ -58,6 +58,21 @@ public class StructNode(BlockNode body, ASTFragmentContext fragmentContext) : IF
     public IExpressionNode PostClean(ASTCleaner cleaner)
     {
         Body.PostCleanStruct(cleaner);
+
+        // Replace impossible fields that use "variable_struct_set" and make them use quoted fields instead.
+        for (int i = 0; i < Body.Children.Count; i++)
+        {
+            if (Body.Children[i] is FunctionCallNode 
+                { 
+                    Function.Name.Content: VMConstants.StructSetFunction, 
+                    Arguments.Count: 3 
+                } 
+                callNode)
+            {
+                Body.Children[i] = new AssignNode(callNode.Arguments[1], callNode.Arguments[2]);
+            }
+        }
+
         return this;
     }
 

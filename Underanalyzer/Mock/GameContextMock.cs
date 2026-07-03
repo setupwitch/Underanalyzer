@@ -44,6 +44,8 @@ public class GameContextMock : IGameContext
     /// <inheritdoc/>
     public bool UsingNewFunctionVariables { get; set; } = false;
     /// <inheritdoc/>
+    public bool UsingStructSpecialCaseNames { get; set; } = false;
+    /// <inheritdoc/>
     public bool UsingSelfToBuiltin { get; set; } = false;
     /// <inheritdoc/>
     public bool UsingGlobalConstantFunction { get; set; } = false;
@@ -73,6 +75,8 @@ public class GameContextMock : IGameContext
     public bool UsingTemplateStrings { get; set; } = true;
     /// <inheritdoc/>
     public bool UsingModernTemplateStrings { get; set; } = true;
+    /// <inheritdoc/>
+    public bool UsingStructAnyNonemptyString { get; set; } = false;
     /// <inheritdoc/>
     public IGlobalFunctions GlobalFunctions { get; } = new GlobalFunctions();
     /// <inheritdoc/>

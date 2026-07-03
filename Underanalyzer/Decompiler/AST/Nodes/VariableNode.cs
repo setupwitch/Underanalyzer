@@ -48,7 +48,7 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
     /// Meant for tracking obscure compiler quirks.
     /// </summary>
     public bool ForceSelf { get; set; } = false;
-
+    
     /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
 

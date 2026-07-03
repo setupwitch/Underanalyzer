@@ -60,6 +60,9 @@ internal static class VMConstants
     // Function name used to set struct variables (used to de-optimize to be closer to source code)
     public const string StructGetFromHashFunction = "struct_get_from_hash";
 
+    // Function name used to set a variable on a struct directly, by string name
+    public const string StructSetFunction = "variable_struct_set";
+
     // Special-case GML functions used during macro resolution
     public const string ChooseFunction = "choose";
     public const string ScriptExecuteFunction = "script_execute";
@@ -90,5 +93,57 @@ internal static class VMConstants
         "phy_collision_y",
         "phy_col_normal_x",
         "phy_col_normal_y"
+    ];
+
+    // Keywords disallowed to be directly used in structs, without quotes (in older versions)
+    public static readonly HashSet<string> OldDisallowedStructKeywords =
+    [
+        "if",
+        "then",
+        "else",
+        "begin",
+        "end",
+        "for",
+        "while",
+        "do",
+        "until",
+        "repeat",
+        "switch",
+        "case",
+        "default",
+        "break",
+        "continue",
+        "with",
+        "new",
+        "function",
+        "return",
+        "exit",
+        "var",
+        "not",
+        "and",
+        "or",
+        "xor",
+        "mod",
+        "div",
+        "throw",
+        "static",
+        "try",
+        "catch",
+        "finally",
+        "enum"
+    ];
+
+    // Keywords disallowed to be directly used in structs, without quotes (in newer versions)
+    public static readonly HashSet<string> ModernDisallowedStructKeywords =
+    [
+        "end",
+        "not",
+        "and",
+        "or",
+        "xor",
+        "mod",
+        "div",
+        "enum",
+        "function"
     ];
 }

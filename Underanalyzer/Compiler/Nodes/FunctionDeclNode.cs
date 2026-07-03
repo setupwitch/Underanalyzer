@@ -287,6 +287,7 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
         // Read assignments from struct literal
         while (!context.EndOfCode && !context.IsCurrentToken(SeparatorKind.BlockClose, KeywordKind.End))
         {
+            bool parsedStringName = false;
             if (context.Tokens[context.Position] is not TokenVariable variable)
             {
                 // Failed to find a variable here... check if a constant/asset reference, string, or keyword
@@ -301,10 +302,15 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
                 else if (context.Tokens[context.Position] is TokenString str)
                 {
                     variable = new TokenVariable(str);
+                    parsedStringName = true;
                 }
                 else if (context.Tokens[context.Position] is TokenKeyword keyword)
                 {
                     variable = new TokenVariable(keyword);
+                }
+                else if (context.Tokens[context.Position] is TokenBoolean boolean)
+                {
+                    variable = new TokenVariable(boolean);
                 }
                 else
                 {
@@ -357,12 +363,59 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
                 }
             }
 
-            // Create assignment statement
-            SimpleVariableNode destination = new(variable)
+            // Create assignment statement (or a function call to "variable_struct_set" in some cases)
+            string variableName = variable.Text;
+            bool modernSpecialCaseNames = context.CompileContext.GameContext.UsingStructSpecialCaseNames;
+            if (string.IsNullOrEmpty(variableName))
             {
-                StructVariable = true
-            };
-            block.Children.Add(new AssignNode(AssignNode.AssignKind.Normal, destination, value));
+                context.CompileContext.PushError("Struct field name cannot be empty", variable);
+            }
+            else if (variableName[0] is not ((>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or '_'))
+            {
+                if (context.CompileContext.GameContext.UsingStructAnyNonemptyString)
+                {
+                    List<IASTNode> callArgs =
+                    [
+                        new SimpleFunctionCallNode(VMConstants.SelfFunction, null, []),
+                        new StringNode(variable.Text, variable),
+                        value
+                    ];
+                    SimpleFunctionCallNode callNode = new(VMConstants.StructSetFunction, null, callArgs)
+                    {
+                        IsStatement = true
+                    };
+                    block.Children.Add(callNode);
+                }
+                else
+                {
+                    context.CompileContext.PushError("Struct field name must start with a-z, A-Z, or _ in this GameMaker version", variable);
+                }
+            }
+            else if (modernSpecialCaseNames && !parsedStringName && VMConstants.ModernDisallowedStructKeywords.Contains(variableName))
+            {
+                context.CompileContext.PushError("Invalid keyword used for struct field name, must surround with quotes", variable);
+            }
+            else if (modernSpecialCaseNames && (variableName == "self" || variableName == "other"))
+            {
+                DotVariableNode destination = new(
+                    new SimpleFunctionCallNode(VMConstants.SelfFunction, 
+                                               context.CompileContext.GameContext.Builtins.LookupBuiltinFunction(VMConstants.SelfFunction), 
+                                               []),
+                    variable);
+                block.Children.Add(new AssignNode(AssignNode.AssignKind.Normal, destination, value));
+            }
+            else if (!modernSpecialCaseNames && !parsedStringName && VMConstants.OldDisallowedStructKeywords.Contains(variableName))
+            {
+                context.CompileContext.PushError("Invalid keyword used for struct field name in this GameMaker version, must surround with quotes", variable);
+            }
+            else
+            {
+                SimpleVariableNode destination = new(variable)
+                {
+                    StructVariable = true
+                };
+                block.Children.Add(new AssignNode(AssignNode.AssignKind.Normal, destination, value));
+            }
 
             // Expect "," or "}"
             if (context.IsCurrentToken(SeparatorKind.Comma))

@@ -246,13 +246,10 @@ internal static class TestUtil
     }
 
     /// <summary>
-    /// Asserts that the given GML code is equivalent to the given bytecode assembly.
+    /// Asserts that the given generated code entry is the same as the given assembly.
     /// </summary>
-    public static void AssertBytecode(string code, string assembly, bool isGlobalScript = false, GameContextMock? gameContext = null)
+    private static void AssertCodeSameAsAssembly(GMCode generated, string assembly, GameContextMock? gameContext = null)
     {
-        // Generate compiled code
-        GMCode generated = CompileCode(code, isGlobalScript, gameContext);
-
         // Generate comparison code
         GMCode comparison = GetCode(assembly, gameContext);
 
@@ -299,7 +296,7 @@ internal static class TestUtil
 
                 // Self sometimes becomes builtin/stacktop for instructions, but not the actual variable itself
                 if (actualInstr.ResolvedVariable!.InstanceType != IGMInstruction.InstanceType.Self ||
-                    variable.InstanceType is not (IGMInstruction.InstanceType.Builtin or 
+                    variable.InstanceType is not (IGMInstruction.InstanceType.Builtin or
                                                   IGMInstruction.InstanceType.StackTop))
                 {
                     Assert.Equal(variable.InstanceType, actualInstr.ResolvedVariable!.InstanceType);
@@ -319,6 +316,17 @@ internal static class TestUtil
             }
         }
         Assert.Equal(comparison.InstructionCount, generated.Instructions.Count);
+    }
+
+    /// <summary>
+    /// Asserts that the given GML code is equivalent to the given bytecode assembly.
+    /// </summary>
+    public static void AssertBytecode(string code, string assembly, bool isGlobalScript = false, GameContextMock? gameContext = null)
+    {
+        // Generate compiled code
+        GMCode generated = CompileCode(code, isGlobalScript, gameContext);
+
+        AssertCodeSameAsAssembly(generated, assembly, gameContext);
     }
 
     /// <summary>
@@ -348,6 +356,27 @@ internal static class TestUtil
 
         // Compile code
         GMCode generated = CompileCode(code, isGlobalScript, gameContext);
+
+        // Decompile generated code entry
+        DecompileContext decompilerContext = new(gameContext, generated, decompileSettings);
+        string decompileResult = decompilerContext.DecompileToString();
+
+        // Ensure code is identical to expected decompilation
+        Assert.Equal(expected.Trim().ReplaceLineEndings("\n"), decompileResult.Trim());
+    }
+
+    /// <summary>
+    /// Compiles the given GML code, asserts bytecode assembly, then decompiles it, ensuring the decompilation result is identical to the expected result.
+    /// </summary>
+    public static void VerifyRoundTrip(string code, string assembly, string expected, bool isGlobalScript = false, GameContextMock? gameContext = null, DecompileSettings? decompileSettings = null)
+    {
+        gameContext ??= new();
+
+        // Compile code
+        GMCode generated = CompileCode(code, isGlobalScript, gameContext);
+
+        // Assert bytecode
+        AssertCodeSameAsAssembly(generated, assembly);
 
         // Decompile generated code entry
         DecompileContext decompilerContext = new(gameContext, generated, decompileSettings);

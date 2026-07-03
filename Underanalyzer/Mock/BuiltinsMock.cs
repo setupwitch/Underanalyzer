@@ -38,6 +38,7 @@ public class BuiltinsMock : IBuiltins
         { "script_execute", new("script_execute", 1, int.MaxValue) },
         { "array_set", new("array_set", 3, 3) },
         { "array_create", new("array_create", 1, 2) },
+        { VMConstants.StructSetFunction, new(VMConstants.StructSetFunction, 3, 3) },
         { VMConstants.SelfFunction, new(VMConstants.SelfFunction, 0, 0) },
         { VMConstants.OtherFunction, new(VMConstants.OtherFunction, 0, 0) },
         { VMConstants.GlobalFunction, new(VMConstants.GlobalFunction, 0, 0) },

@@ -462,6 +462,14 @@ internal sealed record TokenVariable : IToken
         BuiltinVariable = Context.CompileContext.GameContext.Builtins.LookupBuiltinVariable(Text);
     }
 
+    public TokenVariable(TokenBoolean boolean)
+    {
+        Context = boolean.Context;
+        TextPosition = boolean.TextPosition;
+        Text = boolean.ToString();
+        BuiltinVariable = null;
+    }
+
     public override string ToString()
     {
         return Text;

@@ -3426,4 +3426,51 @@ public class DecompileContext_DecompileToString
             """
         );
     }
+
+    [Fact]
+    public void TestStructWithImpossibleField()
+    {
+        TestUtil.VerifyDecompileResult(
+            """
+            pushi.e 123
+            pop.v.i local.a
+            pushloc.v local.a
+            b [2]
+            
+            > struct_func___struct__1 (locals=0, args=0)
+            :[1]
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.c
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            push.s "("
+            call.i @@This@@ 0
+            call.i variable_struct_set 3
+            popz.v
+            exit.i
+            
+            :[2]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -16
+            pop.v.v [stacktop]static.___struct___1
+            call.i @@NewGMLObject@@ 2
+            pop.v.v self.b
+            """,
+            """
+            var a = 123;
+            b = 
+            {
+                c: a,
+                "(": a
+            };
+            """
+        );
+    }
 }
