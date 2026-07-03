@@ -339,10 +339,14 @@ public class AssignNode : IStatementNode, IExpressionNode, IBlockCleanupNode
                 if (printer.StructArguments is not null)
                 {
                     // We're inside a struct initialization block
-                    if (Variable is VariableNode { Variable.Name.Content: string variableName })
+                    if (Variable is VariableNode { Variable.Name.Content: string variableName } varNode)
                     {
                         // Write just the variable name if possible
-                        if (VariableNameIsValidIdentifier(variableName))
+                        if (varNode.WriteInQuotes)
+                        {
+                            StringNode.PrintGMS2String(printer, variableName);
+                        }
+                        else if (VariableNameIsValidIdentifier(variableName))
                         {
                             printer.Write(variableName);
                         }

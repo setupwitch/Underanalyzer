@@ -1644,12 +1644,12 @@ public class RoundTrip
             """
             a = 
             {
-                case: 1,
-                default: 2,
-                throw: 3,
-                function: 4,
+                "case": 1,
+                "default": 2,
+                "throw": 3,
+                "function": 4,
                 regular_variable: 5,
-                begin: 6
+                "begin": 6
             };
             """
         );
@@ -1949,6 +1949,24 @@ public class RoundTrip
             old_bug_now_fixed = $"\{{123}}";
             spaces_test = @@string@@("{ 0}", 123);
             spaces_test_2 = @@string@@("{0 }", 123);
+            """
+        );
+    }
+
+    [Fact]
+    public void TestStructWithImpossibleField()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            function test()
+            {
+                a = 
+                {
+                    ";": 4,
+                    "hello world": "hi programmer",
+                    b: 6
+                };
+            }
             """
         );
     }

@@ -91,4 +91,50 @@ internal static class VMConstants
         "phy_col_normal_x",
         "phy_col_normal_y"
     ];
+    
+    // Language keywords
+    public static readonly HashSet<string> LanguageKeywords =
+    [
+        "if",
+        "else",
+        "do",
+        "while",
+        "for",
+        "repeat",
+        "switch",
+        "case",
+        "default",
+        "break",
+        "continue",
+        "with",
+        "new",
+        "constructor",
+        "function",
+        "return",
+        "exit",
+        "var",
+        "until",
+        "and",
+        "or",
+        "xor",
+        "begin",
+        "end",
+        "then",
+        "mod",
+        "div",
+        "throw",
+        "static",
+        "try",
+        "catch",
+        "finally",
+        "enum",
+        "true",
+        "false",
+        "self",
+        "other",
+        "all",
+        "noone",
+        "global",
+        "undefined"
+    ];
 }

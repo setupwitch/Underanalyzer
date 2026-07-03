@@ -49,6 +49,12 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
     /// </summary>
     public bool ForceSelf { get; set; } = false;
 
+    /// <summary>
+    /// Whether this variable node should be written in quotes.
+    /// Used for impossible fields in struct literals.
+    /// </summary>
+    public bool WriteInQuotes { get; set; } = false;
+    
     /// <inheritdoc/>
     public bool Duplicated { get; set; } = false;
 
@@ -416,7 +422,15 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
         if (argIndex == -1 || printer.TopFragmentContext.IsRootFragment)
         {
             // Variable name
-            printer.Write(Variable.Name.Content);
+            if (WriteInQuotes)
+            {
+                // This is the only case where the variable name needs to be written in quotes.
+                printer.Write($"\"{variable.Name.Content}\"");
+            }
+            else
+            {
+                printer.Write(Variable.Name.Content);
+            }
         }
         else
         {

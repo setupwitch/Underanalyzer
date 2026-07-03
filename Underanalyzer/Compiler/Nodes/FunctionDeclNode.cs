@@ -357,12 +357,29 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
                 }
             }
 
-            // Create assignment statement
-            SimpleVariableNode destination = new(variable)
+            // Create assignment statement, or a function call to 'variable_struct_set' if the name is not a valid identifier.
+            if (!IsValidIdentifier(variable.Text))
             {
-                StructVariable = true
-            };
-            block.Children.Add(new AssignNode(AssignNode.AssignKind.Normal, destination, value));
+                List<IASTNode> callArgs = new(3)
+                {
+                    new SimpleFunctionCallNode(VMConstants.SelfFunction, null, []),
+                    new StringNode(variable.Text, variable),
+                    value
+                };
+                SimpleFunctionCallNode callNode = new("variable_struct_set", null, callArgs)
+                {
+                    IsStatement = true
+                };
+                block.Children.Add(callNode);
+            }
+            else
+            {
+                SimpleVariableNode destination = new(variable)
+                {
+                    StructVariable = true
+                };
+                block.Children.Add(new AssignNode(AssignNode.AssignKind.Normal, destination, value));
+            }
 
             // Expect "," or "}"
             if (context.IsCurrentToken(SeparatorKind.Comma))
@@ -633,5 +650,35 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
         {
             yield return InheritanceCall;
         }
+    }
+
+    private static bool IsValidIdentifier(string name)
+    {
+        if (string.IsNullOrEmpty(name) || VMConstants.LanguageKeywords.Contains(name))
+        {
+            return false;
+        }
+
+        char firstChar = name[0];
+        if ((firstChar < 'a' || firstChar > 'z') && 
+            (firstChar < 'A' || firstChar > 'Z') && 
+            firstChar != '_')
+        {
+            return false;
+        }
+
+        for (int i = 1; i < name.Length; i++)
+        {
+            char c = name[i];
+            if ((c < 'a' || c > 'z') &&
+                (c < 'A' || c > 'Z') &&
+                (c < '0' || c > '9') &&
+                c != '_')
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
