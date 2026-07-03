@@ -1638,18 +1638,514 @@ public class RoundTrip
     }
 
     [Fact]
-    public void TestKeywordStructNames()
+    public void TestModernStructNames()
     {
         TestUtil.VerifyRoundTrip(
             """
-            a = 
+            var a = 123;
+            b = 
             {
-                "case": 1,
-                "default": 2,
-                "throw": 3,
-                "function": 4,
-                regular_variable: 5,
-                "begin": 6
+                c: a,
+                "a b": a,
+                "a\nb": a,
+                "(": a,
+                "a(": a,
+                begin: a,
+                if: a,
+                new: a,
+                "function": a,
+                string: a,
+                "end": a,
+                "self": a,
+                "other": a,
+                "global": a,
+                self: a,
+                other: a,
+                global: a,
+                true: a
+            };
+            """,
+            """
+            pushi.e 123
+            pop.v.i local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            b [2]
+
+            > struct_func___struct__1 (locals=0, args=0)
+            :[1]
+            call.i @@SetStatic@@ 0
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.c
+            pushi.e -15
+            pushi.e 1
+            push.v [array]self.argument
+            pop.v.v self."a b"
+            pushi.e -15
+            pushi.e 2
+            push.v [array]self.argument
+            pop.v.v self."a\nb"
+            pushi.e -15
+            pushi.e 3
+            push.v [array]self.argument
+            push.s "("
+            conv.s.v
+            call.i @@This@@ 0
+            call.i variable_struct_set 3
+            popz.v
+            pushi.e -15
+            pushi.e 4
+            push.v [array]self.argument
+            pop.v.v self."a("
+            pushi.e -15
+            pushi.e 5
+            push.v [array]self.argument
+            pop.v.v self.begin
+            pushi.e -15
+            pushi.e 6
+            push.v [array]self.argument
+            pop.v.v self.if
+            pushi.e -15
+            pushi.e 7
+            push.v [array]self.argument
+            pop.v.v self.new
+            pushi.e -15
+            pushi.e 8
+            push.v [array]self.argument
+            pop.v.v self.function
+            pushi.e -15
+            pushi.e 9
+            push.v [array]self.argument
+            pop.v.v self.string
+            pushi.e -15
+            pushi.e 10
+            push.v [array]self.argument
+            pop.v.v self.end
+            pushi.e -15
+            pushi.e 11
+            push.v [array]self.argument
+            call.i @@This@@ 0
+            pushi.e -9
+            pop.v.v [stacktop]self.self
+            pushi.e -15
+            pushi.e 12
+            push.v [array]self.argument
+            call.i @@This@@ 0
+            pushi.e -9
+            pop.v.v [stacktop]self.other
+            pushi.e -15
+            pushi.e 13
+            push.v [array]self.argument
+            pop.v.v self.global
+            pushi.e -15
+            pushi.e 14
+            push.v [array]self.argument
+            call.i @@This@@ 0
+            pushi.e -9
+            pop.v.v [stacktop]self.self
+            pushi.e -15
+            pushi.e 15
+            push.v [array]self.argument
+            call.i @@This@@ 0
+            pushi.e -9
+            pop.v.v [stacktop]self.other
+            pushi.e -15
+            pushi.e 16
+            push.v [array]self.argument
+            pop.v.v self.global
+            pushi.e -15
+            pushi.e 17
+            push.v [array]self.argument
+            pop.v.v self.true
+            exit.i
+
+            :[2]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__1
+            call.i @@NewGMLObject@@ 19
+            pop.v.v builtin.b
+            """,
+            """
+            var a = 123;
+            b = 
+            {
+                c: a,
+                "a b": a,
+                "a\nb": a,
+                "(": a,
+                "a(": a,
+                begin: a,
+                if: a,
+                new: a,
+                "function": a,
+                string: a,
+                "end": a,
+                self: a,
+                other: a,
+                global: a,
+                self: a,
+                other: a,
+                global: a,
+                true: a
+            };
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = true,
+                UsingConstructorSetStatic = true,
+                UsingNewFunctionVariables = true,
+                UsingOptimizedFunctionDeclarations = true,
+                UsingStructAnyNonemptyString = true,
+                UsingStructSpecialCaseNames = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestNoArbitraryStringsStructNames()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            var a = 123;
+            b = 
+            {
+                case: a,
+                default: a,
+                throw: a,
+                "function": a,
+                regular_variable: a,
+                begin: a,
+                "end": a,
+                if: a,
+                "a b": a,
+                "a\nb": a,
+                "a(": a,
+                new: a,
+                "self": a,
+                "other": a,
+                "global": a,
+                self: a,
+                other: a,
+                global: a,
+                true: a
+            };
+            """,
+            """
+            :[0]
+            pushi.e 123
+            pop.v.i local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            b [2]
+
+            > struct_func___struct__1 (locals=0, args=0)
+            :[1]
+            call.i @@SetStatic@@ 0
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.case
+            pushi.e -15
+            pushi.e 1
+            push.v [array]self.argument
+            pop.v.v self.default
+            pushi.e -15
+            pushi.e 2
+            push.v [array]self.argument
+            pop.v.v self.throw
+            pushi.e -15
+            pushi.e 3
+            push.v [array]self.argument
+            pop.v.v self.function
+            pushi.e -15
+            pushi.e 4
+            push.v [array]self.argument
+            pop.v.v self.regular_variable
+            pushi.e -15
+            pushi.e 5
+            push.v [array]self.argument
+            pop.v.v self.begin
+            pushi.e -15
+            pushi.e 6
+            push.v [array]self.argument
+            pop.v.v self.end
+            pushi.e -15
+            pushi.e 7
+            push.v [array]self.argument
+            pop.v.v self.if
+            pushi.e -15
+            pushi.e 8
+            push.v [array]self.argument
+            pop.v.v self."a b"
+            pushi.e -15
+            pushi.e 9
+            push.v [array]self.argument
+            pop.v.v self."a\nb"
+            pushi.e -15
+            pushi.e 10
+            push.v [array]self.argument
+            pop.v.v self."a("
+            pushi.e -15
+            pushi.e 11
+            push.v [array]self.argument
+            pop.v.v self.new
+            pushi.e -15
+            pushi.e 12
+            push.v [array]self.argument
+            call.i @@This@@ 0
+            pushi.e -9
+            pop.v.v [stacktop]self.self
+            pushi.e -15
+            pushi.e 13
+            push.v [array]self.argument
+            call.i @@This@@ 0
+            pushi.e -9
+            pop.v.v [stacktop]self.other
+            pushi.e -15
+            pushi.e 14
+            push.v [array]self.argument
+            pop.v.v self.global
+            pushi.e -15
+            pushi.e 15
+            push.v [array]self.argument
+            call.i @@This@@ 0
+            pushi.e -9
+            pop.v.v [stacktop]self.self
+            pushi.e -15
+            pushi.e 16
+            push.v [array]self.argument
+            call.i @@This@@ 0
+            pushi.e -9
+            pop.v.v [stacktop]self.other
+            pushi.e -15
+            pushi.e 17
+            push.v [array]self.argument
+            pop.v.v self.global
+            pushi.e -15
+            pushi.e 18
+            push.v [array]self.argument
+            pop.v.v self.true
+            exit.i
+
+            :[2]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -5
+            pop.v.v [stacktop]global.__struct__1
+            call.i @@NewGMLObject@@ 20
+            pop.v.v builtin.b
+            """,
+            """
+            var a = 123;
+            b = 
+            {
+                case: a,
+                default: a,
+                throw: a,
+                "function": a,
+                regular_variable: a,
+                begin: a,
+                "end": a,
+                if: a,
+                "a b": a,
+                "a\nb": a,
+                "a(": a,
+                new: a,
+                self: a,
+                other: a,
+                global: a,
+                self: a,
+                other: a,
+                global: a,
+                true: a
+            };
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = true,
+                UsingConstructorSetStatic = true,
+                UsingNewFunctionVariables = true,
+                UsingStructSpecialCaseNames = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestOldStructNames()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            var a = 123;
+            b = 
+            {
+                c: a,
+                "a b": a,
+                "a\nb": a,
+                "a(": a,
+                "begin": a,
+                "end": a,
+                "new": a,
+                "self": a,
+                "other": a,
+                "global": a,
+                self: a,
+                other: a,
+                global: a,
+                true: a
+            };
+            """,
+            """
+            pushi.e 123
+            pop.v.i local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            pushloc.v local.a
+            b [2]
+
+            > struct_func___struct__1 (locals=0, args=0)
+            :[1]
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.c
+            pushi.e -15
+            pushi.e 1
+            push.v [array]self.argument
+            pop.v.v self."a b"
+            pushi.e -15
+            pushi.e 2
+            push.v [array]self.argument
+            pop.v.v self."a\nb"
+            pushi.e -15
+            pushi.e 3
+            push.v [array]self.argument
+            pop.v.v self."a("
+            pushi.e -15
+            pushi.e 4
+            push.v [array]self.argument
+            pop.v.v self.begin
+            pushi.e -15
+            pushi.e 5
+            push.v [array]self.argument
+            pop.v.v self.end
+            pushi.e -15
+            pushi.e 6
+            push.v [array]self.argument
+            pop.v.v self.new
+            pushi.e -15
+            pushi.e 7
+            push.v [array]self.argument
+            pop.v.v self.self
+            pushi.e -15
+            pushi.e 8
+            push.v [array]self.argument
+            pop.v.v self.other
+            pushi.e -15
+            pushi.e 9
+            push.v [array]self.argument
+            pop.v.v self.global
+            pushi.e -15
+            pushi.e 10
+            push.v [array]self.argument
+            pop.v.v self.self
+            pushi.e -15
+            pushi.e 11
+            push.v [array]self.argument
+            pop.v.v self.other
+            pushi.e -15
+            pushi.e 12
+            push.v [array]self.argument
+            pop.v.v self.global
+            pushi.e -15
+            pushi.e 13
+            push.v [array]self.argument
+            pop.v.v self.true
+            exit.i
+
+            :[2]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -16
+            pop.v.v [stacktop]static.__struct__1
+            call.i @@NewGMLObject@@ 15
+            pop.v.v self.b
+            """,
+            """
+            var a = 123;
+            b = 
+            {
+                c: a,
+                "a b": a,
+                "a\nb": a,
+                "a(": a,
+                "begin": a,
+                "end": a,
+                "new": a,
+                self: a,
+                other: a,
+                global: a,
+                self: a,
+                other: a,
+                global: a,
+                true: a
             };
             """
         );
@@ -1967,7 +2463,12 @@ public class RoundTrip
                     b: 6
                 };
             }
-            """
-        );
+            """,
+            true,
+            new GameContextMock()
+            {
+                UsingStructAnyNonemptyString = true,
+                UsingStructSpecialCaseNames = true
+            });
     }
 }

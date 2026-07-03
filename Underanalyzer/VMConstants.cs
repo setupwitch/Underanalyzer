@@ -60,6 +60,9 @@ internal static class VMConstants
     // Function name used to set struct variables (used to de-optimize to be closer to source code)
     public const string StructGetFromHashFunction = "struct_get_from_hash";
 
+    // Function name used to set a variable on a struct directly, by string name
+    public const string StructSetFunction = "variable_struct_set";
+
     // Special-case GML functions used during macro resolution
     public const string ChooseFunction = "choose";
     public const string ScriptExecuteFunction = "script_execute";
@@ -91,15 +94,19 @@ internal static class VMConstants
         "phy_col_normal_x",
         "phy_col_normal_y"
     ];
-    
-    // Language keywords
-    public static readonly HashSet<string> LanguageKeywords =
+
+    // Keywords disallowed to be directly used in structs, without quotes (in older versions)
+    public static readonly HashSet<string> OldDisallowedStructKeywords =
     [
         "if",
+        "then",
         "else",
-        "do",
-        "while",
+        "begin",
+        "end",
         "for",
+        "while",
+        "do",
+        "until",
         "repeat",
         "switch",
         "case",
@@ -108,18 +115,14 @@ internal static class VMConstants
         "continue",
         "with",
         "new",
-        "constructor",
         "function",
         "return",
         "exit",
         "var",
-        "until",
+        "not",
         "and",
         "or",
         "xor",
-        "begin",
-        "end",
-        "then",
         "mod",
         "div",
         "throw",
@@ -127,14 +130,20 @@ internal static class VMConstants
         "try",
         "catch",
         "finally",
+        "enum"
+    ];
+
+    // Keywords disallowed to be directly used in structs, without quotes (in newer versions)
+    public static readonly HashSet<string> ModernDisallowedStructKeywords =
+    [
+        "end",
+        "not",
+        "and",
+        "or",
+        "xor",
+        "mod",
+        "div",
         "enum",
-        "true",
-        "false",
-        "self",
-        "other",
-        "all",
-        "noone",
-        "global",
-        "undefined"
+        "function"
     ];
 }

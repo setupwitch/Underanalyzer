@@ -296,10 +296,21 @@ public class AssignNode : IStatementNode, IExpressionNode, IBlockCleanupNode
     /// <summary>
     /// Returns whether a variable name is a valid GML identifier or not.
     /// </summary>
-    private static bool VariableNameIsValidIdentifier(string name)
+    private static bool VariableNameIsValidIdentifier(IGameContext context, string name)
     {
         // If name is empty, it's clearly not valid
         if (name.Length == 0)
+        {
+            return false;
+        }
+
+        // If using a disallowed keyword, that's also not valid
+        bool modernSpecialCaseNames = context.UsingStructSpecialCaseNames;
+        if (modernSpecialCaseNames && VMConstants.ModernDisallowedStructKeywords.Contains(name))
+        {
+            return false;
+        }
+        if (!modernSpecialCaseNames && VMConstants.OldDisallowedStructKeywords.Contains(name))
         {
             return false;
         }
@@ -339,14 +350,10 @@ public class AssignNode : IStatementNode, IExpressionNode, IBlockCleanupNode
                 if (printer.StructArguments is not null)
                 {
                     // We're inside a struct initialization block
-                    if (Variable is VariableNode { Variable.Name.Content: string variableName } varNode)
+                    if (Variable is VariableNode { Variable.Name.Content: string variableName })
                     {
                         // Write just the variable name if possible
-                        if (varNode.WriteInQuotes)
-                        {
-                            StringNode.PrintGMS2String(printer, variableName);
-                        }
-                        else if (VariableNameIsValidIdentifier(variableName))
+                        if (VariableNameIsValidIdentifier(printer.Context.GameContext, variableName))
                         {
                             printer.Write(variableName);
                         }

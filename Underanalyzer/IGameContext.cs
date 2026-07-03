@@ -90,6 +90,11 @@ public interface IGameContext
     public bool UsingNewFunctionResolution { get; }
 
     /// <summary>
+    /// <see langword="true"/> if the game uses special variable name cases for structs introduced in GameMaker 2024.13; <see langword="false"/> otherwise.
+    /// </summary>
+    public bool UsingStructSpecialCaseNames { get; }
+
+    /// <summary>
     /// <see langword="true"/> if the game uses bytecode 14 or lower; <see langword="true"/> otherwise.
     /// </summary>
     public bool Bytecode14OrLower { get; }
@@ -219,6 +224,11 @@ public interface IGameContext
     /// This changes the code generation for template strings to match what is observed in GameMaker 2024.14 and above.
     /// </remarks>
     public bool UsingModernTemplateStrings { get; }
+
+    /// <summary>
+    /// <see langword="true"/> if the game supports any non-empty string as a struct variable, introduced in GameMaker 2024.14; <see langword="false"/> otherwise.
+    /// </summary>
+    public bool UsingStructAnyNonemptyString { get; }
 
     /// <summary>
     /// Interface for getting global functions.

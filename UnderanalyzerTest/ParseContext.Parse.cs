@@ -1171,4 +1171,94 @@ public class ParseContext_Parse
 
         Assert.Equal(VMConstants.NewObjectFunction, ((SimpleFunctionCallNode)call.Arguments[2]).FunctionName);
     }
+
+    [Fact]
+    public void TestModernStructNames()
+    {
+        ParseContext context = TestUtil.Parse(
+            """
+            a =
+            {
+                "(": 1,
+                begin: 2
+            };
+            """,
+            new Underanalyzer.Mock.GameContextMock()
+            {
+                UsingStructSpecialCaseNames = true,
+                UsingStructAnyNonemptyString = true
+            });
+
+        Assert.Empty(context.CompileContext.Errors);
+        Assert.False(context.CompileContext.HasErrors);
+    }
+
+    [Fact]
+    public void TestNoArbitraryStringsStructNames()
+    {
+        ParseContext context = TestUtil.Parse(
+            """
+            a =
+            {
+                "(": 1,
+                begin: 2
+            };
+            """,
+            new Underanalyzer.Mock.GameContextMock()
+            {
+                UsingStructSpecialCaseNames = true
+            });
+
+        Assert.NotEmpty(context.CompileContext.Errors);
+        Assert.True(context.CompileContext.HasErrors);
+    }
+
+    [Fact]
+    public void TestNoArbitraryStringsStructNames2()
+    {
+        ParseContext context = TestUtil.Parse(
+            """
+            a =
+            {
+                begin: 1
+            };
+            """,
+            new Underanalyzer.Mock.GameContextMock()
+            {
+                UsingStructSpecialCaseNames = true
+            });
+
+        Assert.Empty(context.CompileContext.Errors);
+        Assert.False(context.CompileContext.HasErrors);
+    }
+
+    [Fact]
+    public void TestOldStructNames()
+    {
+        ParseContext context = TestUtil.Parse(
+            """
+            a =
+            {
+                begin: 1
+            };
+            """);
+
+        Assert.NotEmpty(context.CompileContext.Errors);
+        Assert.True(context.CompileContext.HasErrors);
+    }
+
+    [Fact]
+    public void TestOldStructNames2()
+    {
+        ParseContext context = TestUtil.Parse(
+            """
+            a =
+            {
+                "begin": 1
+            };
+            """);
+
+        Assert.Empty(context.CompileContext.Errors);
+        Assert.False(context.CompileContext.HasErrors);
+    }
 }

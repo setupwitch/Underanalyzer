@@ -247,11 +247,12 @@ public static class VMAssembly
                         {
                             throw new Exception("Pop needs parameter");
                         }
+                        string data = string.Join(' ', parts[1..]).Trim();
 
                         // Parse swap variant
                         if (instr.Type1 == IGMInstruction.DataType.Int16)
                         {
-                            if (!byte.TryParse(parts[1], out byte popSwapSize) || popSwapSize < 5 || popSwapSize > 6)
+                            if (!byte.TryParse(data, out byte popSwapSize) || popSwapSize < 5 || popSwapSize > 6)
                             {
                                 throw new Exception("Unexpected pop swap size");
                             }
@@ -260,9 +261,9 @@ public static class VMAssembly
                         }
 
                         // Parse variable destination
-                        if (!ParseVariableFromString(parts[1], variables, out var variable, out var varType, out var instType))
+                        if (!ParseVariableFromString(data, variables, out var variable, out var varType, out var instType))
                         {
-                            throw new Exception($"Failed to parse variable {parts[1]}");
+                            throw new Exception($"Failed to parse variable {data}");
                         }
                         instr.ResolvedVariable = variable;
                         instr.ReferenceVarType = varType;
@@ -346,7 +347,7 @@ public static class VMAssembly
                         {
                             throw new Exception("Push instruction needs data");
                         }
-                        string data = parts[1];
+                        string data = string.Join(' ', parts[1..]).Trim();
 
                         switch (type1)
                         {
@@ -402,7 +403,7 @@ public static class VMAssembly
                             case IGMInstruction.DataType.Variable:
                                 if (!ParseVariableFromString(data, variables, out var variable, out var varType, out var instType))
                                 {
-                                    throw new Exception($"Failed to parse variable {parts[1]}");
+                                    throw new Exception($"Failed to parse variable {data}");
                                 }
                                 instr.ResolvedVariable = variable;
                                 instr.ReferenceVarType = varType;
@@ -579,6 +580,16 @@ public static class VMAssembly
 
         // Get actual variable name
         str = str[(dot + 1)..];
+
+        // If the variable name starts with ", treat it as a string we need to deal with escapes in
+        if (str.StartsWith('"'))
+        {
+            if (!str.EndsWith('"'))
+            {
+                throw new Exception("Expected end quote at end of variable name");
+            }
+            str = UnescapeStringContents(str[1..^1]);
+        }
 
         // Update variable
         variable = new GMVariable(new GMString(str))

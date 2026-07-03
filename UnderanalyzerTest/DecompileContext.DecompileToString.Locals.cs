@@ -1670,54 +1670,6 @@ public class DecompileContext_DecompileToString_Locals
     }
 
     [Fact]
-    public void TestStructWithImpossibleField()
-    {
-        TestUtil.VerifyDecompileResult(
-            """
-            :[0]
-            pushi.e 123
-            pop.v.i local.a
-            pushloc.v local.a
-            b [2]
-            
-            > gml_Script____struct___Test (locals=0, args=0)
-            :[1]
-            pushi.e -15
-            pushi.e 0
-            push.v [array]self.argument
-            pop.v.v self.c
-            pushi.e -15
-            pushi.e 0
-            push.v [array]self.argument
-            push.s "("
-            call.i @@This@@ 0
-            call.i variable_struct_set 3
-            popz.v
-            exit.i
-            
-            :[2]
-            push.i [function]gml_Script____struct___Test
-            conv.i.v
-            call.i @@NullObject@@ 0
-            call.i method 2
-            dup.v 0
-            pushi.e -16
-            pop.v.v [stacktop]static.___struct___Test
-            call.i @@NewGMLObject@@ 2
-            pop.v.v self.b
-            """,
-            """
-            var a = 123;
-            b = 
-            {
-                c: a,
-                "(": a
-            };
-            """
-        );
-    }
-
-    [Fact]
     public void TestArray()
     {
         TestUtil.VerifyDecompileResult(
