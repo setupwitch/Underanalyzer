@@ -210,6 +210,7 @@ internal sealed class SimpleFunctionCallNode : IMaybeStatementASTNode
             "int64" => OptimizeInt64(),
             "real" => OptimizeReal(context),
             "string" => OptimizeString(context),
+            "variable_get_hash" => OptimizeVariableGetHash(context),
             _ => this,
         };
     }
@@ -468,6 +469,30 @@ internal sealed class SimpleFunctionCallNode : IMaybeStatementASTNode
 
         // Simply return the inner string node
         return str;
+    }
+
+    /// <summary>
+    /// Optimizes a variable_get_hash() function call if possible, returning an optimized node.
+    /// </summary>
+    private IASTNode OptimizeVariableGetHash(ParseContext context)
+    {
+        // Can only optimize if a string is passed in
+        if (Arguments is not [StringNode str])
+        {
+            return this;
+        }
+
+        // Can only optimize if in a valid version
+        if (!context.CompileContext.GameContext.UsingVariableHashFunctions)
+        {
+            return this;
+        }
+
+        // Create a variable hash node!
+        return new VariableHashNode(
+            str.Value, 
+            context.CompileContext.GameContext.Builtins.LookupBuiltinVariable(str.Value) is not null, 
+            str.NearbyToken);
     }
 
     /// <summary>

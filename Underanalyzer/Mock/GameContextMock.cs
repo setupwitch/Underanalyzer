@@ -48,6 +48,8 @@ public class GameContextMock : IGameContext
     /// <inheritdoc/>
     public bool UsingSelfToBuiltin { get; set; } = false;
     /// <inheritdoc/>
+    public bool UsingVariableHashFunctions { get; set; } = false;
+    /// <inheritdoc/>
     public bool UsingGlobalConstantFunction { get; set; } = false;
     /// <inheritdoc/>
     public bool UsingObjectFunctionForesight { get; set; } = false;

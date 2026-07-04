@@ -379,7 +379,19 @@ public static class VMAssembly
                                     if (data.StartsWith("[variable]", StringComparison.Ordinal))
                                     {
                                         // We're pushing a variable hash instead
-                                        instr.ResolvedVariable = new GMVariable(new GMString(data["[variable]".Length..]));
+                                        string variableName = data["[variable]".Length..];
+                                        if (variableName.StartsWith('"'))
+                                        {
+                                            if (!variableName.EndsWith('"'))
+                                            {
+                                                throw new Exception("Expected quote at the end of variable hash name");
+                                            }
+                                            variableName = UnescapeStringContents(variableName[1..^1]);
+                                        }
+                                        instr.ResolvedVariable = new GMVariable(new GMString(variableName))
+                                        {
+                                            InstanceType = IGMInstruction.InstanceType.Self
+                                        };
                                         break;
                                     }
                                     throw new Exception("Unknown push.i value");

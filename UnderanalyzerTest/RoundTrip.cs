@@ -2471,4 +2471,35 @@ public class RoundTrip
                 UsingStructSpecialCaseNames = true
             });
     }
+
+    [Fact]
+    public void TestVariableGetHashOptimization()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            test = variable_get_hash("abc");
+            test = variable_get_hash("");
+            test = variable_get_hash("a\nb");
+            """,
+            """
+            push.i [variable]abc
+            pop.v.i builtin.test
+            push.i [variable]""
+            pop.v.i builtin.test
+            push.i [variable]"a\nb"
+            pop.v.i builtin.test
+            """,
+            """
+            test = variable_get_hash("abc");
+            test = variable_get_hash("");
+            test = variable_get_hash("a\nb");
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = true,
+                UsingVariableHashFunctions = true
+            }
+        );
+    }
 }

@@ -75,9 +75,9 @@ public class VariableHashNode(IGMVariable variable) : IExpressionNode, IStatemen
             printer.Write("(");
         }
 
-        printer.Write("variable_get_hash(\"");
-        printer.Write(Variable.Name.Content);
-        printer.Write("\")");
+        printer.Write("variable_get_hash(");
+        StringNode.PrintGMS2String(printer, Variable.Name.Content);
+        printer.Write(")");
 
         if (Group)
         {

@@ -167,6 +167,11 @@ public interface IGameContext
     public bool UsingSelfToBuiltin { get; }
 
     /// <summary>
+    /// <see langword="true"/> if struct variable functions exist as introduced in GameMaker 2024.2; <see langword="false"/> otherwise.
+    /// </summary>
+    public bool UsingVariableHashFunctions { get; }
+
+    /// <summary>
     /// <see langword="true"/> if the "global" constant should become a function call during code generation; <see langword="false"/> otherwise.
     /// </summary>
     /// <remarks>
