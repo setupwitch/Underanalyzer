@@ -132,11 +132,11 @@ public class TemplateStringNode(IGMString format, List<IExpressionNode> fields)
         printer.Write('"');
     }
 
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
-        foreach (var field in Fields)
+        foreach (IExpressionNode field in Fields)
         {
-            if (field.RequiresMultipleLines(printer))
+            if (field.RequiresMultipleLines(printer, false))
             {
                 return true;
             }

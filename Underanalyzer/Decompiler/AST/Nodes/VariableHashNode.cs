@@ -86,9 +86,9 @@ public class VariableHashNode(IGMVariable variable) : IExpressionNode, IStatemen
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
-        return false;
+        return isStatementLHS && Group;
     }
 
     /// <inheritdoc/>

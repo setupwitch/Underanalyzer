@@ -79,18 +79,25 @@ public class StructNode(BlockNode body, ASTFragmentContext fragmentContext) : IF
     /// <inheritdoc/>
     IStatementNode IASTNode<IStatementNode>.Clean(ASTCleaner cleaner)
     {
-        throw new NotImplementedException();
+        // When a standalone statement, make sure this is grouped
+        Group = true;
+
+        return this;
     }
 
     /// <inheritdoc/>
     IStatementNode IASTNode<IStatementNode>.PostClean(ASTCleaner cleaner)
     {
-        throw new NotImplementedException();
+        return this;
     }
 
     /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
+        if (Group)
+        {
+            printer.Write('(');
+        }
         if (Body.Children.Count == 0)
         {
             // Don't print a normal block in this case; condense down
@@ -100,12 +107,21 @@ public class StructNode(BlockNode body, ASTFragmentContext fragmentContext) : IF
         {
             Body.Print(printer);
         }
+        if (Group)
+        {
+            if (Body.Children.Count > 0 && !printer.Context.Settings.OpenBlockBraceOnSameLine)
+            {
+                printer.EndLine();
+                printer.StartLine();
+            }
+            printer.Write(')');
+        }
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
-        return Body.Children.Count != 0;
+        return (isStatementLHS && Group) || Body.Children.Count != 0;
     }
 
     /// <inheritdoc/>

@@ -453,7 +453,7 @@ public class BlockNode(ASTFragmentContext fragmentContext) : IFragmentNode, IBlo
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
         // If we have more than one child node, or zero child nodes, we need multiple lines
         if (Children.Count > 1 || Children.Count == 0)
@@ -462,7 +462,7 @@ public class BlockNode(ASTFragmentContext fragmentContext) : IFragmentNode, IBlo
         }
 
         // If our single child needs multiple lines, so do we
-        if (Children[0].RequiresMultipleLines(printer))
+        if (Children[0].RequiresMultipleLines(printer, true))
         {
             return true;
         }

@@ -3286,4 +3286,233 @@ public class RoundTrip
             """
         );
     }
+
+    [Fact]
+    public void TestFunctionChainParentheses3()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+                b = 123;
+            if (c)
+            {
+                (test()).test();
+            }
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestFunctionChainParentheses4()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+            {
+                (-b).c();
+            }
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestFunctionChainParentheses5()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+            {
+                (b ? c : d).e();
+            }
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestUnaryGroupings()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            a = -b;
+            a = -(-b);
+            a = -(-(-b));
+            """
+        );
+    }
+
+    [Fact]
+    public void TestUnaryGroupings2()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            (-a).b();
+            """
+        );
+    }
+
+    [Fact]
+    public void TestUnaryGroupings3()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            (-a)();
+            """
+        );
+    }
+
+    [Fact]
+    public void TestChainParentheses()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+            {
+                (b ? c : d).e = 123;
+            }
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestStandaloneStruct()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            ({})
+            """
+        );
+    }
+
+    [Fact]
+    public void TestStandaloneStruct2()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            (
+            {
+                a: 123
+            }
+            )
+            """
+        );
+    }
+
+    [Fact]
+    public void TestStandaloneStruct3()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+            {
+                ({})
+            }
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestStandaloneStruct4()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+            {
+                (
+                {
+                    b: 123
+                }
+                )
+            }
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestStandaloneStruct5()
+    {
+        TestUtil.VerifyRoundTripAssembly(
+            """
+            ({})
+            """,
+            """
+            call.i @@NewGMLObject@@ 0
+            popz.v
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingOptimizedFunctionDeclarations = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestStandaloneStruct6()
+    {
+        TestUtil.VerifyRoundTripAssembly(
+            """
+            if (a)
+            {
+                ({})
+            }
+            """,
+            """
+            push.v builtin.a
+            conv.v.b
+            bf [2]
+
+            :[1]
+            call.i @@NewGMLObject@@ 0
+            popz.v
+
+            :[2]
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingOptimizedFunctionDeclarations = true,
+                UsingSelfToBuiltin = true
+            },
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
 }

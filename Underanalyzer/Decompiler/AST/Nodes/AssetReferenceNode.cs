@@ -52,7 +52,7 @@ public class AssetReferenceNode(int assetId, AssetType assetType) : IExpressionN
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
         return false;
     }

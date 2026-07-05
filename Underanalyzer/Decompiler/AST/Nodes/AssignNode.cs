@@ -433,13 +433,13 @@ public class AssignNode : IStatementNode, IExpressionNode, IBlockCleanupNode
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
-        if (Variable.RequiresMultipleLines(printer))
+        if (Variable.RequiresMultipleLines(printer, true))
         {
             return true;
         }
-        if (Value is not null && Value.RequiresMultipleLines(printer))
+        if (Value is not null && Value.RequiresMultipleLines(printer, false))
         {
             return true;
         }

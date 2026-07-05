@@ -134,7 +134,7 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
                 }
             }
         }
-        if (canGenerateParentheses && Function is IMultiExpressionNode)
+        if (canGenerateParentheses && Function is IMultiExpressionNode or UnaryNode)
         {
             printer.Write('(');
             Function.Print(printer);
@@ -161,23 +161,26 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
+        if (isStatementLHS && Group)
+        {
+            return true;
+        }
         if (Instance is not null)
         {
-            // TODO: need to check this
-            if (Instance.RequiresMultipleLines(printer))
+            if (Instance.RequiresMultipleLines(printer, isStatementLHS))
             {
                 return true;
             }
         }
-        if (Function.RequiresMultipleLines(printer))
+        if (Function.RequiresMultipleLines(printer, isStatementLHS && Instance is null))
         {
             return true;
         }
         foreach (IExpressionNode arg in Arguments)
         {
-            if (arg.RequiresMultipleLines(printer))
+            if (arg.RequiresMultipleLines(printer, false))
             {
                 return true;
             }

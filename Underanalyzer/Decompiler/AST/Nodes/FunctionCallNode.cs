@@ -300,11 +300,15 @@ public class FunctionCallNode(IGMFunction function, List<IExpressionNode> argume
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
+        if (isStatementLHS && Group)
+        {
+            return true;
+        }
         foreach (IExpressionNode arg in Arguments)
         {
-            if (arg.RequiresMultipleLines(printer))
+            if (arg.RequiresMultipleLines(printer, false))
             {
                 return true;
             }

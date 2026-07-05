@@ -240,7 +240,7 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
         }
 
         // Determine if Left needs to be grouped
-        if (Left is IMultiExpressionNode)
+        if (Left is IMultiExpressionNode or UnaryNode)
         {
             Left.Group = true;
         }
@@ -479,9 +479,9 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
-        if (Left.RequiresMultipleLines(printer))
+        if (Left.RequiresMultipleLines(printer, isStatementLHS))
         {
             return true;
         }
@@ -489,7 +489,7 @@ public class VariableNode(IGMVariable variable, VariableType referenceType, IExp
         {
             foreach (IExpressionNode index in ArrayIndices)
             {
-                if (index.RequiresMultipleLines(printer))
+                if (index.RequiresMultipleLines(printer, false))
                 {
                     return true;
                 }

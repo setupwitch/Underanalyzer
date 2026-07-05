@@ -126,7 +126,7 @@ public class StringNode(IGMString value) : IConstantNode<IGMString>, IConditiona
     }
 
     /// <inheritdoc/>
-    public bool RequiresMultipleLines(ASTPrinter printer)
+    public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
         return false;
     }
