@@ -3139,4 +3139,151 @@ public class RoundTrip
         Assert.NotNull(compileContext.OutputFunctionEntries[6].Parent);
         Assert.True(compileContext.OutputFunctionEntries[6].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
     }
+
+    [Fact]
+    public void TestFunctionChainParentheses()
+    {
+        TestUtil.VerifyRoundTripAssembly(
+            """
+            function first_call()
+            {
+            }
+
+            first_call().test();
+            (first_call()).test();
+            var_first_call().test();
+            (var_first_call()).test();
+            """,
+            """
+            b [2]
+
+            > global_func_first_call (locals=0, args=0)
+            :[1]
+            exit.i
+
+            :[2]
+            push.i [function]global_func_first_call
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            dup.v 0
+            pushi.e -6
+            pop.v.v [stacktop]self.first_call
+            popz.v
+            call.i global_func_first_call 0
+            dup.v 0
+            pushi.e -9
+            push.v [stacktop]self.test
+            callv.v 0
+            popz.v
+            call.i global_func_first_call 0
+            dup.v 0 1
+            dup.v 0
+            push.v stacktop.test
+            callv.v 0
+            popz.v
+            call.i @@This@@ 0
+            push.v builtin.var_first_call
+            callv.v 0
+            dup.v 0
+            pushi.e -9
+            push.v [stacktop]self.test
+            callv.v 0
+            popz.v
+            call.i @@This@@ 0
+            push.v builtin.var_first_call
+            callv.v 0
+            dup.v 0 1
+            dup.v 0
+            push.v stacktop.test
+            callv.v 0
+            popz.v
+            """,
+            true
+        );
+    }
+
+    [Fact]
+    public void TestFunctionChainParenthesesNew()
+    {
+        TestUtil.VerifyRoundTripAssembly(
+            """
+            function first_call()
+            {
+            }
+
+            first_call().test();
+            (first_call()).test();
+            var_first_call().test();
+            (var_first_call()).test();
+            """,
+            """
+            b [2]
+
+            > global_func_first_call (locals=0, args=0)
+            :[1]
+            exit.i
+
+            :[2]
+            push.i [function]global_func_first_call
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            dup.v 0
+            pop.v.v self.first_call
+            popz.v
+            call.i global_func_first_call 0
+            dup.v 0
+            pushi.e -9
+            push.v [stacktop]self.test
+            dup.e 2 0
+            callv.v 0
+            popz.v
+            call.i global_func_first_call 0
+            dup.v 0 1
+            dup.v 0
+            push.v stacktop.test
+            callv.v 0
+            popz.v
+            call.i @@This@@ 0
+            push.v builtin.var_first_call
+            callv.v 0
+            dup.v 0
+            pushi.e -9
+            push.v [stacktop]self.test
+            dup.e 2 0
+            callv.v 0
+            popz.v
+            call.i @@This@@ 0
+            push.v builtin.var_first_call
+            callv.v 0
+            dup.v 0 1
+            dup.v 0
+            push.v stacktop.test
+            callv.v 0
+            popz.v
+            """,
+            true,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = true,
+                UsingOptimizedFunctionDeclarations = true,
+                UsingNewChainedFunctionArgumentOrder = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestFunctionChainParentheses2()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            b.c();
+            self.b().c();
+            a().b.c();
+            """
+        );
+    }
 }

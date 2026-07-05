@@ -404,6 +404,7 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
                     new SimpleFunctionCallNode(VMConstants.SelfFunction, 
                                                context.CompileContext.GameContext.Builtins.LookupBuiltinFunction(VMConstants.SelfFunction), 
                                                []),
+                    false,
                     variable);
                 block.Children.Add(new AssignNode(AssignNode.AssignKind.Normal, destination, value));
             }

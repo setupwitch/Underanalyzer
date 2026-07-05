@@ -278,6 +278,10 @@ public class FunctionCallNode(IGMFunction function, List<IExpressionNode> argume
     /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
+        if (Group)
+        {
+            printer.Write('(');
+        }
         printer.Write(printer.LookupFunction(Function));
         printer.Write('(');
         for (int i = 0; i < Arguments.Count; i++)
@@ -289,6 +293,10 @@ public class FunctionCallNode(IGMFunction function, List<IExpressionNode> argume
             }
         }
         printer.Write(')');
+        if (Group)
+        {
+            printer.Write(')');
+        }
     }
 
     /// <inheritdoc/>

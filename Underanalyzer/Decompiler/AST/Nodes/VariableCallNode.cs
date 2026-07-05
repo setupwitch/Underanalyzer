@@ -112,6 +112,10 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
     /// <inheritdoc/>
     public void Print(ASTPrinter printer)
     {
+        if (Group)
+        {
+            printer.Write('(');
+        }
         bool canGenerateParentheses = true;
         if (Instance is not null)
         {
@@ -150,6 +154,10 @@ public class VariableCallNode(IExpressionNode function, IExpressionNode? instanc
             }
         }
         printer.Write(')');
+        if (Group)
+        {
+            printer.Write(')');
+        }
     }
 
     /// <inheritdoc/>

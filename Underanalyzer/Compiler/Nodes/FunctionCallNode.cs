@@ -191,7 +191,7 @@ internal sealed class FunctionCallNode : IMaybeStatementASTNode
         {
             // Handle pretty strange compiler quirk with no dup swaps being performed (if no dot on left side of this dot)
             // (until a new dup swap mode was added in 2024.14.4, also handled by this logic)
-            if (!inChain && FunctionCallNodeOnLeftmostSide(dotVar))
+            if (!inChain && !dotVar.LeftExpressionGrouped && FunctionCallNodeOnLeftmostSide(dotVar))
             {
                 inChain = true;
 
