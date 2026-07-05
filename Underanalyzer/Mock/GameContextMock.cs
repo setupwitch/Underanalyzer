@@ -34,6 +34,8 @@ public class GameContextMock : IGameContext
     /// <inheritdoc/>
     public bool UsingConstructorSetStatic { get; set; } = false;
     /// <inheritdoc/>
+    public bool UsingExternalStructArrays { get; set; } = false;
+    /// <inheritdoc/>
     public bool UsingReentrantStatic { get; set; } = true;
     /// <inheritdoc/>
     public bool UsingArrayCopyOnWrite { get; set; } = false;

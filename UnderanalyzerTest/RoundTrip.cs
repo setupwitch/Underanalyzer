@@ -2502,4 +2502,168 @@ public class RoundTrip
             }
         );
     }
+
+    [Fact]
+    public void TestStructEmbeddedArrayOld()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            a = 
+            {
+                b: [1, 2, 3, 4],
+                c: 
+                {
+                    d: 5678
+                }
+            };
+            """,
+            """
+            b [4]
+
+            > struct_func___struct__1 (locals=0, args=0)
+            :[1]
+            pushi.e 4
+            conv.i.v
+            pushi.e 3
+            conv.i.v
+            pushi.e 2
+            conv.i.v
+            pushi.e 1
+            conv.i.v
+            call.i @@NewGMLArray@@ 4
+            pop.v.v self.b
+            b [3]
+
+            > struct_func___struct__2 (locals=0, args=0)
+            :[2]
+            pushi.e 5678
+            pop.v.i self.d
+            exit.i
+
+            :[3]
+            push.i [function]struct_func___struct__2
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -5
+            pop.v.v [stacktop]global.__struct__2
+            call.i @@NewGMLObject@@ 1
+            pop.v.v self.c
+            exit.i
+
+            :[4]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -5
+            pop.v.v [stacktop]global.__struct__1
+            call.i @@NewGMLObject@@ 1
+            pop.v.v builtin.a
+            """,
+            """
+            a = 
+            {
+                b: [1, 2, 3, 4],
+                c: 
+                {
+                    d: 5678
+                }
+            };
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = true,
+                UsingNewFunctionVariables = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestStructEmbeddedArrayNew()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            a = 
+            {
+                b: [1, 2, 3, 4],
+                c: 
+                {
+                    d: 5678
+                }
+            };
+            """,
+            """
+            pushi.e 4
+            conv.i.v
+            pushi.e 3
+            conv.i.v
+            pushi.e 2
+            conv.i.v
+            pushi.e 1
+            conv.i.v
+            call.i @@NewGMLArray@@ 4
+            b [4]
+
+            > struct_func___struct__1 (locals=0, args=0)
+            :[1]
+            call.i @@SetStatic@@ 0
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.b
+            b [3]
+
+            > struct_func___struct__2 (locals=0, args=0)
+            :[2]
+            call.i @@SetStatic@@ 0
+            pushi.e 5678
+            pop.v.i self.d
+            exit.i
+
+            :[3]
+            push.i [function]struct_func___struct__2
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__2
+            call.i @@NewGMLObject@@ 1
+            pop.v.v self.c
+            exit.i
+
+            :[4]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__1
+            call.i @@NewGMLObject@@ 2
+            pop.v.v builtin.a
+            """,
+            """
+            a = 
+            {
+                b: [1, 2, 3, 4],
+                c: 
+                {
+                    d: 5678
+                }
+            };
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = true,
+                UsingNewFunctionVariables = true,
+                UsingOptimizedFunctionDeclarations = true,
+                UsingConstructorSetStatic = true,
+                UsingExternalStructArrays = true
+            }
+        );
+    }
 }

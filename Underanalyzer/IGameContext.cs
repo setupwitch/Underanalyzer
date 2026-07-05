@@ -129,6 +129,11 @@ public interface IGameContext
     public bool UsingConstructorSetStatic { get; }
 
     /// <summary>
+    /// <see langword="true"/> if this game uses the new code generation for arrays embedded within structs, as observed starting in GameMaker version 2024.11; <see langword="false"/> otherwise.
+    /// </summary>
+    public bool UsingExternalStructArrays { get; }
+
+    /// <summary>
     /// <see langword="true"/> if this game uses array copy-on-write behavior (only relevant for GMLv2); <see langword="false"/> otherwise.
     /// </summary>
     /// <remarks>

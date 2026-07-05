@@ -344,7 +344,10 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
             // Non-constant values get hoisted outside of the struct function itself
             if (value is not (IConstantASTNode or FunctionDeclNode))
             {
-                if (value is SimpleFunctionCallNode { FunctionName: VMConstants.NewArrayFunction or VMConstants.NewObjectFunction } func)
+                bool externalArrays = context.CompileContext.GameContext.UsingExternalStructArrays;
+                if (value is SimpleFunctionCallNode func &&
+                    (func.FunctionName is VMConstants.NewObjectFunction ||
+                     !externalArrays && func.FunctionName is VMConstants.NewArrayFunction))
                 {
                     // Hoist individual elements of array/struct, rather than entire array/struct
                     for (int i = 0; i < func.Arguments.Count; i++)
