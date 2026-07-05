@@ -112,14 +112,15 @@ public class BlockNode(ASTFragmentContext fragmentContext) : IFragmentNode, IBlo
         bool newFragment = FragmentContext != cleaner.TopFragmentContext;
         if (newFragment)
         {
-            if (isStruct && cleaner.Context.Settings.CleanupLocalVarDeclarations)
+            if (isStruct && cleaner.Context.Settings.CleanupLocalVarDeclarations &&
+                cleaner.TopFragmentContext!.CurrentLocalScope is not null)
             {
                 // Connect the struct's local scope to the parent local scope tree.
                 // This allows struct local variable reads to hoist locals outside of the struct.
-                ASTFragmentContext parentContext = cleaner.TopFragmentContext!;
+                ASTFragmentContext parentContext = cleaner.TopFragmentContext;
                 cleaner.PushFragmentContext(FragmentContext);
-                cleaner.TopFragmentContext!.PushLocalScope(cleaner.Context, this, this);
-                cleaner.TopFragmentContext!.CurrentLocalScope!.InsertAsChildOf(parentContext.CurrentLocalScope!);
+                cleaner.TopFragmentContext.PushLocalScope(cleaner.Context, this, this);
+                cleaner.TopFragmentContext.CurrentLocalScope.InsertAsChildOf(parentContext.CurrentLocalScope);
             }
             else
             {

@@ -527,7 +527,6 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
             oldScope.StaticVariableName,
             IsStruct ? FunctionEntryKind.StructInstantiation : FunctionEntryKind.FunctionDeclaration
         );
-        context.CurrentFunctionEntry = entry;
         context.FunctionEntries.Add(entry);
 
         // Assign function entry in the current scope if named
@@ -542,8 +541,21 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
         // Mark scope as generating a function declaration header
         Scope.GeneratingFunctionDeclHeader = true;
 
+        // If using new code generation, assign current function entry for default arguments
+        bool assignEntryBeforeDefaultArgs = context.CompileContext.GameContext.UsingFixedDefaultArgumentFunctionDecls;
+        if (assignEntryBeforeDefaultArgs)
+        {
+            context.CurrentFunctionEntry = entry;
+        }
+
         // Generate default argument assignments, before main body
         DefaultValueBlock?.GenerateCode(context);
+
+        // Inheritance call seems to always use parent entry...
+        if (assignEntryBeforeDefaultArgs)
+        {
+            context.CurrentFunctionEntry = parentEntry;
+        }
 
         // Inheritance call, before main body
         if (InheritanceCall is SimpleFunctionCallNode inheritCall)
@@ -557,6 +569,9 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
             context.Emit(Opcode.Convert, DataType.Int32, DataType.Variable);
             context.EmitCall(FunctionPatch.FromBuiltin(context, VMConstants.CopyStaticFunction), 1);
         }
+
+        // No matter what version, current function entry should be assigned from now on
+        context.CurrentFunctionEntry = entry;
 
         // Mark scope as no longer generating a function declaration header
         Scope.GeneratingFunctionDeclHeader = false;

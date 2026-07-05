@@ -1726,7 +1726,7 @@ public class RoundTrip
     [Fact]
     public void TestModernStructNames()
     {
-        TestUtil.VerifyRoundTrip(
+        TestUtil.VerifyRoundTripAssembly(
             """
             var a = 123;
             b = 
@@ -1913,7 +1913,7 @@ public class RoundTrip
     [Fact]
     public void TestNoArbitraryStringsStructNames()
     {
-        TestUtil.VerifyRoundTrip(
+        TestUtil.VerifyRoundTripAssembly(
             """
             var a = 123;
             b = 
@@ -2103,7 +2103,7 @@ public class RoundTrip
     [Fact]
     public void TestOldStructNames()
     {
-        TestUtil.VerifyRoundTrip(
+        TestUtil.VerifyRoundTripAssembly(
             """
             var a = 123;
             b = 
@@ -2561,7 +2561,7 @@ public class RoundTrip
     [Fact]
     public void TestVariableGetHashOptimization()
     {
-        TestUtil.VerifyRoundTrip(
+        TestUtil.VerifyRoundTripAssembly(
             """
             test = variable_get_hash("abc");
             test = variable_get_hash("");
@@ -2575,11 +2575,6 @@ public class RoundTrip
             push.i [variable]"a\nb"
             pop.v.i builtin.test
             """,
-            """
-            test = variable_get_hash("abc");
-            test = variable_get_hash("");
-            test = variable_get_hash("a\nb");
-            """,
             false,
             new GameContextMock()
             {
@@ -2592,7 +2587,7 @@ public class RoundTrip
     [Fact]
     public void TestStructEmbeddedArrayOld()
     {
-        TestUtil.VerifyRoundTrip(
+        TestUtil.VerifyRoundTripAssembly(
             """
             a = 
             {
@@ -2649,16 +2644,6 @@ public class RoundTrip
             call.i @@NewGMLObject@@ 1
             pop.v.v builtin.a
             """,
-            """
-            a = 
-            {
-                b: [1, 2, 3, 4],
-                c: 
-                {
-                    d: 5678
-                }
-            };
-            """,
             false,
             new GameContextMock()
             {
@@ -2671,7 +2656,7 @@ public class RoundTrip
     [Fact]
     public void TestStructEmbeddedArrayNew()
     {
-        TestUtil.VerifyRoundTrip(
+        TestUtil.VerifyRoundTripAssembly(
             """
             a = 
             {
@@ -2731,16 +2716,6 @@ public class RoundTrip
             call.i @@NewGMLObject@@ 2
             pop.v.v builtin.a
             """,
-            """
-            a = 
-            {
-                b: [1, 2, 3, 4],
-                c: 
-                {
-                    d: 5678
-                }
-            };
-            """,
             false,
             new GameContextMock()
             {
@@ -2751,5 +2726,417 @@ public class RoundTrip
                 UsingExternalStructArrays = true
             }
         );
+    }
+
+    [Fact]
+    public void TestFunctionDeclsAdvancedOld()
+    {
+        Underanalyzer.Compiler.CompileContext compileContext = TestUtil.VerifyRoundTripAssembly(
+            """
+            function test_parent(arg0) constructor
+            {
+            }
+
+            function test(arg0, arg1 = 
+            {
+                a: arg0
+            }, arg2 = function()
+            {
+            }) : test_parent(
+            {
+                b: arg0
+            }) constructor
+            {
+                static c = 
+                {
+                    d: 123
+                };
+                
+                e = 
+                {
+                    f: 456
+                };
+            }
+            """,
+            """
+            b [2]
+
+            > global_func_test_parent (locals=0, args=1)
+            :[1]
+            exit.i
+
+            :[2]
+            push.i [function]global_func_test_parent
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -6
+            pop.v.v [stacktop]self.test_parent
+            popz.v
+            b [20]
+
+            > global_func_test (locals=0, args=3)
+            :[3]
+            push.v arg.argument1
+            pushbltn.v builtin.undefined
+            cmp.v.v EQ
+            bf [7]
+
+            :[4]
+            push.v arg.argument0
+            b [6]
+
+            > struct_func___struct__1 (locals=0, args=0)
+            :[5]
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.a
+            exit.i
+
+            :[6]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -16
+            pop.v.v [stacktop]static.__struct__1
+            call.i @@NewGMLObject@@ 2
+            pop.v.v arg.argument1
+
+            :[7]
+            push.v arg.argument2
+            pushbltn.v builtin.undefined
+            cmp.v.v EQ
+            bf [11]
+
+            :[8]
+            b [10]
+
+            > anon_func_1 (locals=0, args=0)
+            :[9]
+            exit.i
+
+            :[10]
+            push.i [function]anon_func_1
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            pop.v.v arg.argument2
+
+            :[11]
+            push.v arg.argument0
+            b [13]
+
+            > struct_func___struct__2 (locals=0, args=0)
+            :[12]
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.b
+            exit.i
+
+            :[13]
+            push.i [function]struct_func___struct__2
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -16
+            pop.v.v [stacktop]static.__struct__2
+            call.i @@NewGMLObject@@ 2
+            call.i global_func_test_parent 1
+            push.i [function]global_func_test_parent
+            conv.i.v
+            call.i @@CopyStatic@@ 1
+            isstaticok.e
+            bt [17]
+
+            :[14]
+            b [16]
+
+            > struct_func___struct__3 (locals=0, args=0)
+            :[15]
+            pushi.e 123
+            pop.v.i self.d
+            exit.i
+
+            :[16]
+            push.i [function]struct_func___struct__3
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -16
+            pop.v.v [stacktop]static.__struct__3
+            call.i @@NewGMLObject@@ 1
+            pop.v.v static.c
+
+            :[17]
+            setstatic.e
+            b [19]
+
+            > struct_func___struct__4 (locals=0, args=0)
+            :[18]
+            pushi.e 456
+            pop.v.i self.f
+            exit.i
+
+            :[19]
+            push.i [function]struct_func___struct__4
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -16
+            pop.v.v [stacktop]static.__struct__4
+            call.i @@NewGMLObject@@ 1
+            pop.v.v self.e
+            exit.i
+
+            :[20]
+            push.i [function]global_func_test
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pushi.e -6
+            pop.v.v [stacktop]self.test
+            popz.v
+            """,
+            true
+        );
+
+        Assert.Equal(7, compileContext.OutputFunctionEntries!.Count);
+        Assert.True(compileContext.OutputFunctionEntries[0].IsConstructor);
+        Assert.True(compileContext.OutputFunctionEntries[0].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.FunctionDeclaration);
+        Assert.Null(compileContext.OutputFunctionEntries[0].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[1].IsConstructor);
+        Assert.True(compileContext.OutputFunctionEntries[1].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.FunctionDeclaration);
+        Assert.Null(compileContext.OutputFunctionEntries[1].Parent);
+        Assert.Null(compileContext.OutputFunctionEntries[2].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[2].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
+        Assert.Null(compileContext.OutputFunctionEntries[3].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[3].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.FunctionDeclaration);
+        Assert.Null(compileContext.OutputFunctionEntries[4].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[4].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
+        Assert.NotNull(compileContext.OutputFunctionEntries[5].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[5].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
+        Assert.NotNull(compileContext.OutputFunctionEntries[6].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[6].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
+    }
+
+    [Fact]
+    public void TestFunctionDeclsAdvancedNew()
+    {
+        Underanalyzer.Compiler.CompileContext compileContext = TestUtil.VerifyRoundTripAssembly(
+            """
+            function test_parent(arg0) constructor
+            {
+            }
+
+            function test(arg0, arg1 = 
+            {
+                a: arg0
+            }, arg2 = function()
+            {
+            }) : test_parent(
+            {
+                b: arg0
+            }) constructor
+            {
+                static c = 
+                {
+                    d: 123
+                };
+                
+                e = 
+                {
+                    f: 456
+                };
+            }
+            """,
+            """
+            b [2]
+
+            > global_func_test_parent (locals=0, args=1)
+            :[1]
+            call.i @@SetStatic@@ 0
+            exit.i
+
+            :[2]
+            push.i [function]global_func_test_parent
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v self.test_parent
+            popz.v
+            b [20]
+
+            > global_func_test (locals=0, args=3)
+            :[3]
+            pushbltn.v builtin.argument1
+            pushbltn.v builtin.undefined
+            cmp.v.v EQ
+            bf [7]
+
+            :[4]
+            push.v arg.argument0
+            b [6]
+
+            > struct_func___struct__1 (locals=0, args=0)
+            :[5]
+            call.i @@SetStatic@@ 0
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.a
+            exit.i
+
+            :[6]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__1
+            call.i @@NewGMLObject@@ 2
+            pop.v.v builtin.argument1
+
+            :[7]
+            pushbltn.v builtin.argument2
+            pushbltn.v builtin.undefined
+            cmp.v.v EQ
+            bf [11]
+
+            :[8]
+            b [10]
+
+            > anon_func_1 (locals=0, args=0)
+            :[9]
+            exit.i
+
+            :[10]
+            push.i [function]anon_func_1
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            pop.v.v builtin.argument2
+
+            :[11]
+            push.v arg.argument0
+            b [13]
+
+            > struct_func___struct__2 (locals=0, args=0)
+            :[12]
+            call.i @@SetStatic@@ 0
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.b
+            exit.i
+
+            :[13]
+            push.i [function]struct_func___struct__2
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__2
+            call.i @@NewGMLObject@@ 2
+            call.i global_func_test_parent 1
+            push.i [function]global_func_test_parent
+            conv.i.v
+            call.i @@CopyStatic@@ 1
+            call.i @@SetStatic@@ 0
+            isstaticok.e
+            bt [17]
+
+            :[14]
+            setstatic.e
+            b [16]
+
+            > struct_func___struct__3 (locals=0, args=0)
+            :[15]
+            call.i @@SetStatic@@ 0
+            pushi.e 123
+            pop.v.i self.d
+            exit.i
+
+            :[16]
+            push.i [function]struct_func___struct__3
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__3
+            call.i @@NewGMLObject@@ 1
+            pop.v.v static.c
+
+            :[17]
+            b [19]
+
+            > struct_func___struct__4 (locals=0, args=0)
+            :[18]
+            call.i @@SetStatic@@ 0
+            pushi.e 456
+            pop.v.i self.f
+            exit.i
+
+            :[19]
+            push.i [function]struct_func___struct__4
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__4
+            call.i @@NewGMLObject@@ 1
+            pop.v.v builtin.e
+            exit.i
+
+            :[20]
+            push.i [function]global_func_test
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v self.test
+            popz.v
+            """,
+            true,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = true,
+                UsingConstructorSetStatic = true,
+                UsingNewFunctionVariables = true,
+                UsingOptimizedFunctionDeclarations = true,
+                UsingBuiltinDefaultArguments = true,
+                UsingReentrantStatic = false,
+                UsingFixedDefaultArgumentFunctionDecls = true
+            }
+        );
+
+        Assert.Equal(7, compileContext.OutputFunctionEntries!.Count);
+        Assert.True(compileContext.OutputFunctionEntries[0].IsConstructor);
+        Assert.True(compileContext.OutputFunctionEntries[0].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.FunctionDeclaration);
+        Assert.Null(compileContext.OutputFunctionEntries[0].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[1].IsConstructor);
+        Assert.True(compileContext.OutputFunctionEntries[1].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.FunctionDeclaration);
+        Assert.Null(compileContext.OutputFunctionEntries[1].Parent);
+        Assert.NotNull(compileContext.OutputFunctionEntries[2].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[2].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
+        Assert.NotNull(compileContext.OutputFunctionEntries[3].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[3].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.FunctionDeclaration);
+        Assert.Null(compileContext.OutputFunctionEntries[4].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[4].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
+        Assert.NotNull(compileContext.OutputFunctionEntries[5].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[5].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
+        Assert.NotNull(compileContext.OutputFunctionEntries[6].Parent);
+        Assert.True(compileContext.OutputFunctionEntries[6].Kind == Underanalyzer.Compiler.Bytecode.FunctionEntryKind.StructInstantiation);
     }
 }

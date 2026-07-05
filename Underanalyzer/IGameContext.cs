@@ -241,6 +241,14 @@ public interface IGameContext
     public bool UsingStructAnyNonemptyString { get; }
 
     /// <summary>
+    /// <see langword="true"/> if the game uses the fixed names for default argument values which are function declarations; <see langword="false"/> otherwise.
+    /// </summary>
+    /// <remarks>
+    /// This changes the code generation to match what is observed in GameMaker 2024.14 and above.
+    /// </remarks>
+    public bool UsingFixedDefaultArgumentFunctionDecls { get; }
+
+    /// <summary>
     /// Interface for getting global functions.
     /// Can be custom, or can use the provided implementation of <see cref="Decompiler.GlobalFunctions"/>.
     /// This should not be modified during decompilation.

@@ -135,7 +135,7 @@ internal static class TestUtil
     /// <summary>
     /// Compiles the given GML code using the given game context.
     /// </summary>
-    public static GMCode CompileCode(string code, bool isGlobalScript = false, GameContextMock? gameContext = null)
+    public static (GMCode, CompileContext) CompileCode(string code, bool isGlobalScript = false, GameContextMock? gameContext = null)
     {
         // Compile code
         gameContext ??= new();
@@ -242,7 +242,7 @@ internal static class TestUtil
             rootEntry.Children.Add(childEntry);
         }
 
-        return rootEntry;
+        return (rootEntry, context);
     }
 
     /// <summary>
@@ -321,23 +321,25 @@ internal static class TestUtil
     /// <summary>
     /// Asserts that the given GML code is equivalent to the given bytecode assembly.
     /// </summary>
-    public static void AssertBytecode(string code, string assembly, bool isGlobalScript = false, GameContextMock? gameContext = null)
+    public static CompileContext AssertBytecode(string code, string assembly, bool isGlobalScript = false, GameContextMock? gameContext = null)
     {
         // Generate compiled code
-        GMCode generated = CompileCode(code, isGlobalScript, gameContext);
+        (GMCode generated, CompileContext compileContext) = CompileCode(code, isGlobalScript, gameContext);
 
         AssertCodeSameAsAssembly(generated, assembly, gameContext);
+
+        return compileContext;
     }
 
     /// <summary>
     /// Compiles the given GML code, then decompiles it, ensuring the decompilation result is identical to the source.
     /// </summary>
-    public static void VerifyRoundTrip(string code, bool isGlobalScript = false, GameContextMock? gameContext = null, DecompileSettings? decompileSettings = null)
+    public static CompileContext VerifyRoundTrip(string code, bool isGlobalScript = false, GameContextMock? gameContext = null, DecompileSettings? decompileSettings = null)
     {
         gameContext ??= new();
 
         // Compile code
-        GMCode generated = CompileCode(code, isGlobalScript, gameContext);
+        (GMCode generated, CompileContext compileContext) = CompileCode(code, isGlobalScript, gameContext);
 
         // Decompile generated code entry
         DecompileContext decompilerContext = new(gameContext, generated, decompileSettings);
@@ -345,17 +347,19 @@ internal static class TestUtil
 
         // Ensure code is identical
         Assert.Equal(code.Trim().ReplaceLineEndings("\n"), decompileResult.Trim());
+
+        return compileContext;
     }
 
     /// <summary>
     /// Compiles the given GML code, then decompiles it, ensuring the decompilation result is identical to the expected result.
     /// </summary>
-    public static void VerifyRoundTrip(string code, string expected, bool isGlobalScript = false, GameContextMock? gameContext = null, DecompileSettings? decompileSettings = null)
+    public static CompileContext VerifyRoundTrip(string code, string expected, bool isGlobalScript = false, GameContextMock? gameContext = null, DecompileSettings? decompileSettings = null)
     {
         gameContext ??= new();
 
         // Compile code
-        GMCode generated = CompileCode(code, isGlobalScript, gameContext);
+        (GMCode generated, CompileContext compileContext) = CompileCode(code, isGlobalScript, gameContext);
 
         // Decompile generated code entry
         DecompileContext decompilerContext = new(gameContext, generated, decompileSettings);
@@ -363,17 +367,42 @@ internal static class TestUtil
 
         // Ensure code is identical to expected decompilation
         Assert.Equal(expected.Trim().ReplaceLineEndings("\n"), decompileResult.Trim());
+
+        return compileContext;
+    }
+
+    /// <summary>
+    /// Compiles the given GML code, asserts bytecode assembly, then decompiles it, ensuring the decompilation result is identical to the source.
+    /// </summary>
+    public static CompileContext VerifyRoundTripAssembly(string code, string assembly, bool isGlobalScript = false, GameContextMock? gameContext = null, DecompileSettings? decompileSettings = null)
+    {
+        gameContext ??= new();
+
+        // Compile code
+        (GMCode generated, CompileContext compileContext) = CompileCode(code, isGlobalScript, gameContext);
+
+        // Assert bytecode
+        AssertCodeSameAsAssembly(generated, assembly);
+
+        // Decompile generated code entry
+        DecompileContext decompilerContext = new(gameContext, generated, decompileSettings);
+        string decompileResult = decompilerContext.DecompileToString();
+
+        // Ensure code is identical to expected decompilation
+        Assert.Equal(code.Trim().ReplaceLineEndings("\n"), decompileResult.Trim());
+
+        return compileContext;
     }
 
     /// <summary>
     /// Compiles the given GML code, asserts bytecode assembly, then decompiles it, ensuring the decompilation result is identical to the expected result.
     /// </summary>
-    public static void VerifyRoundTrip(string code, string assembly, string expected, bool isGlobalScript = false, GameContextMock? gameContext = null, DecompileSettings? decompileSettings = null)
+    public static CompileContext VerifyRoundTripAssembly(string code, string assembly, string expected, bool isGlobalScript = false, GameContextMock? gameContext = null, DecompileSettings? decompileSettings = null)
     {
         gameContext ??= new();
 
         // Compile code
-        GMCode generated = CompileCode(code, isGlobalScript, gameContext);
+        (GMCode generated, CompileContext compileContext) = CompileCode(code, isGlobalScript, gameContext);
 
         // Assert bytecode
         AssertCodeSameAsAssembly(generated, assembly);
@@ -384,5 +413,7 @@ internal static class TestUtil
 
         // Ensure code is identical to expected decompilation
         Assert.Equal(expected.Trim().ReplaceLineEndings("\n"), decompileResult.Trim());
+
+        return compileContext;
     }
 }
