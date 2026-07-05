@@ -3402,7 +3402,7 @@ public class RoundTrip
     {
         TestUtil.VerifyRoundTrip(
             """
-            ({})
+            ({});
             """
         );
     }
@@ -3416,7 +3416,7 @@ public class RoundTrip
             {
                 a: 123
             }
-            )
+            );
             """
         );
     }
@@ -3428,7 +3428,7 @@ public class RoundTrip
             """
             if (a)
             {
-                ({})
+                ({});
             }
             """,
             false,
@@ -3451,7 +3451,7 @@ public class RoundTrip
                 {
                     b: 123
                 }
-                )
+                );
             }
             """,
             false,
@@ -3468,7 +3468,7 @@ public class RoundTrip
     {
         TestUtil.VerifyRoundTripAssembly(
             """
-            ({})
+            ({});
             """,
             """
             call.i @@NewGMLObject@@ 0
@@ -3489,7 +3489,7 @@ public class RoundTrip
             """
             if (a)
             {
-                ({})
+                ({});
             }
             """,
             """

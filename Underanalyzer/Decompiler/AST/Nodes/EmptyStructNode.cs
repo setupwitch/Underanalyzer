@@ -24,7 +24,7 @@ public class EmptyStructNode() : IExpressionNode, IStatementNode, IConditionalVa
     public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
 
     /// <inheritdoc/>
-    public bool SemicolonAfter => false;
+    public bool SemicolonAfter => Group;
 
     /// <inheritdoc/>
     public bool EmptyLineBefore { get; set; }

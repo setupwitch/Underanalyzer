@@ -30,7 +30,7 @@ public class StructNode(BlockNode body, ASTFragmentContext fragmentContext) : IF
     public IGMInstruction.DataType StackType { get; set; } = IGMInstruction.DataType.Variable;
 
     /// <inheritdoc/>
-    public bool SemicolonAfter => false;
+    public bool SemicolonAfter => Group;
 
     /// <inheritdoc/>
     public bool EmptyLineBefore { get => false; set => _ = value; }
