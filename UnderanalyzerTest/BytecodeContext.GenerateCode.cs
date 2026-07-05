@@ -5,6 +5,7 @@
 */
 
 using Underanalyzer;
+using Underanalyzer.Mock;
 
 namespace UnderanalyzerTest;
 
@@ -72,7 +73,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i self.d
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingGMLv2 = false
             }
@@ -100,7 +101,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i self.d
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingGMLv2 = true
             }
@@ -128,7 +129,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i self.d
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingGMLv2 = true,
                 UsingGlobalConstantFunction = true
@@ -139,12 +140,12 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestVariableCalls()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = true,
             UsingAssetReferences = false
         };
-        ((Underanalyzer.Mock.BuiltinsMock)gameContext.Builtins)
+        ((BuiltinsMock)gameContext.Builtins)
             .BuiltinFunctions["show_debug_message"] = new("show_debug_message", 1, 1);
         gameContext.DefineMockAsset(AssetType.Object, 123, "obj_test");
         TestUtil.AssertBytecode(
@@ -218,13 +219,13 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestVariableCallsAssetRefs()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = true,
             UsingAssetReferences = true,
             UsingSelfToBuiltin = true
         };
-        ((Underanalyzer.Mock.BuiltinsMock)gameContext.Builtins)
+        ((BuiltinsMock)gameContext.Builtins)
             .BuiltinFunctions["show_debug_message"] = new("show_debug_message", 1, 1);
         gameContext.DefineMockAsset(AssetType.Object, 123, "obj_test");
         TestUtil.AssertBytecode(
@@ -407,7 +408,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestRepeatVariableCalls2()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = true,
             UsingAssetReferences = false
@@ -443,7 +444,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestRepeatVariableCalls2AssetRefs()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = true,
             UsingAssetReferences = true
@@ -505,7 +506,7 @@ public class BytecodeContext_GenerateCode
     {
         // NOTE: These compile somewhat differently depending on GameMaker version, which this currently ignores.
         //       As of writing this test, the goal is to mainly get compatible code compilation for all versions.
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = true,
             UsingAssetReferences = false
@@ -644,7 +645,7 @@ public class BytecodeContext_GenerateCode
     {
         // NOTE: These compile somewhat differently depending on GameMaker version, which this currently ignores.
         //       As of writing this test, the goal is to mainly get compatible code compilation for all versions.
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = true,
             UsingAssetReferences = true
@@ -784,7 +785,7 @@ public class BytecodeContext_GenerateCode
     {
         // NOTE: These compile somewhat differently depending on GameMaker version, which this currently ignores.
         //       As of writing this test, the goal is to mainly get compatible code compilation for all versions.
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = true,
             UsingAssetReferences = false
@@ -1156,7 +1157,8 @@ public class BytecodeContext_GenerateCode
             pop.v.v [array]self.a
             pushi.e 1
             conv.i.v
-            pushi.e -1
+            call.i @@This@@ 0
+            pushi.e -9
             pushi.e 0
             pop.v.v [array]self.a
             pushi.e 1
@@ -1172,9 +1174,10 @@ public class BytecodeContext_GenerateCode
             pushi.e 1
             add.i.v
             pop.i.v [array]self.a
-            pushi.e -1
+            call.i @@This@@ 0
+            pushi.e -9
             pushi.e 0
-            dup.i 1
+            dup.i 5
             push.v [array]self.a
             pushi.e 1
             add.i.v
@@ -1191,7 +1194,8 @@ public class BytecodeContext_GenerateCode
             pushi.e 0
             push.v [array]self.a
             pop.v.v self.a
-            pushi.e -1
+            call.i @@This@@ 0
+            pushi.e -9
             pushi.e 0
             push.v [array]self.a
             pop.v.v self.a
@@ -1219,7 +1223,8 @@ public class BytecodeContext_GenerateCode
             pop.v.i self.a
             pushi.e 1
             conv.i.v
-            pushi.e -2
+            call.i @@Other@@ 0
+            pushi.e -9
             pushi.e 0
             pop.v.v [array]self.a
             pushi.e 1
@@ -1276,14 +1281,225 @@ public class BytecodeContext_GenerateCode
             push.v stacktop.b
             callv.v 1
             popz.v
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = false,
+                UsingGlobalConstantFunction = false
+            }
+        );
+    }
+
+    [Fact]
+    public void TestNonSelfToBuiltin2()
+    {
+        TestUtil.AssertBytecode(
             """
+            a = 0;
+            self.a = 0;
+            a = b;
+            a = self.b;
+            a += 1;
+            self.a += 1;
+            a++;
+            self.a++;
+            a.b = 0;
+            a[0] = 1;
+            self.a[0] = 1;
+            a.b[0] = 1;
+            a[0] += 1;
+            self.a[0] += 1;
+            a.b[0] += 1;
+            a = a[0];
+            a = self.a[0];
+            a = a.b[0];
+            global.a = 0;
+            global.a[0] = 0;
+            self.a.b = 1;
+            a.b = 1;
+            a = 1;
+            other.a[0] = 1;
+            global.a[0] = 1;
+            a[0].b = 1;
+            a = a[0].b;
+            a = a[0];
+            a[0].b[0]("a");
+            a[0].b.c("a");
+            a[0].b("a");
+            """,
+            """
+            pushi.e 0
+            pop.v.i self.a
+            pushi.e 0
+            pop.v.i self.a
+            push.v self.b
+            pop.v.v self.a
+            push.v self.b
+            pop.v.v self.a
+            push.v self.a
+            pushi.e 1
+            add.i.v
+            pop.v.v self.a
+            push.v self.a
+            pushi.e 1
+            add.i.v
+            pop.v.v self.a
+            push.v self.a
+            push.e 1
+            add.i.v
+            pop.v.v self.a
+            push.v self.a
+            push.e 1
+            add.i.v
+            pop.v.v self.a
+            pushi.e 0
+            push.v self.a
+            pushi.e -9
+            pop.v.i [stacktop]self.b
+            pushi.e 1
+            conv.i.v
+            pushi.e -1
+            pushi.e 0
+            pop.v.v [array]self.a
+            pushi.e 1
+            conv.i.v
+            pushi.e -1
+            pushi.e 0
+            pop.v.v [array]self.a
+            pushi.e 1
+            conv.i.v
+            push.v self.a
+            pushi.e -9
+            pushi.e 0
+            pop.v.v [array]self.b
+            pushi.e -1
+            pushi.e 0
+            dup.i 1
+            push.v [array]self.a
+            pushi.e 1
+            add.i.v
+            pop.i.v [array]self.a
+            pushi.e -1
+            pushi.e 0
+            dup.i 1
+            push.v [array]self.a
+            pushi.e 1
+            add.i.v
+            pop.i.v [array]self.a
+            push.v self.a
+            pushi.e -9
+            pushi.e 0
+            dup.i 5
+            push.v [array]self.b
+            pushi.e 1
+            add.i.v
+            pop.i.v [array]self.b
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.a
+            pop.v.v self.a
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.a
+            pop.v.v self.a
+            push.v self.a
+            pushi.e -9
+            pushi.e 0
+            push.v [array]self.b
+            pop.v.v self.a
+            pushi.e 0
+            pop.v.i global.a
+            pushi.e 0
+            conv.i.v
+            call.i @@Global@@ 0
+            pushi.e -9
+            pushi.e 0
+            pop.v.v [array]self.a
+            pushi.e 1
+            push.v self.a
+            pushi.e -9
+            pop.v.i [stacktop]self.b
+            pushi.e 1
+            push.v self.a
+            pushi.e -9
+            pop.v.i [stacktop]self.b
+            pushi.e 1
+            pop.v.i self.a
+            pushi.e 1
+            conv.i.v
+            pushi.e -2
+            pushi.e 0
+            pop.v.v [array]self.a
+            pushi.e 1
+            conv.i.v
+            call.i @@Global@@ 0
+            pushi.e -9
+            pushi.e 0
+            pop.v.v [array]self.a
+            pushi.e 1
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.a
+            pushi.e -9
+            pop.v.i [stacktop]self.b
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.a
+            pushi.e -9
+            push.v [stacktop]self.b
+            pop.v.v self.a
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.a
+            pop.v.v self.a
+            push.s "a"
+            conv.s.v
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.a
+            pushi.e -9
+            pushi.e 0
+            push.v [array]self.b
+            dup.v 0
+            callv.v 1
+            popz.v
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.a
+            pushi.e -9
+            push.v [stacktop]self.b
+            push.s "a"
+            conv.s.v
+            dup.v 1 1
+            dup.v 0
+            push.v stacktop.c
+            callv.v 1
+            popz.v
+            pushi.e -1
+            pushi.e 0
+            push.v [array]self.a
+            push.s "a"
+            conv.s.v
+            dup.v 1 1
+            dup.v 0
+            push.v stacktop.b
+            callv.v 1
+            popz.v
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = false,
+                UsingGlobalConstantFunction = true
+            }
         );
     }
 
     [Fact]
     public void TestSelfToBuiltin()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingSelfToBuiltin = true,
             UsingGlobalConstantFunction = true
@@ -1493,7 +1709,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionReferencesModern()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingAssetReferences = true,
             UsingSelfToBuiltin = true,
@@ -1504,10 +1720,10 @@ public class BytecodeContext_GenerateCode
         gameContext.DefineMockAsset(AssetType.Script, 125, "global_func_AnotherFunction");
         gameContext.DefineMockAsset(AssetType.Script, 123, "ExampleFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("ExampleFunction", new Underanalyzer.Mock.GMFunction("ExampleFunction"));
+            .DefineFunction("ExampleFunction", new GMFunction("ExampleFunction"));
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("AnotherFunction", new Underanalyzer.Mock.GMFunction("global_func_AnotherFunction"));
-        ((Underanalyzer.Mock.BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
+            .DefineFunction("AnotherFunction", new GMFunction("global_func_AnotherFunction"));
+        ((BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
             new("script_execute", 0, int.MaxValue);
         TestUtil.AssertBytecode(
             """
@@ -1584,7 +1800,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionReferencesRegularModern()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingAssetReferences = true,
             UsingSelfToBuiltin = true,
@@ -1596,10 +1812,10 @@ public class BytecodeContext_GenerateCode
         gameContext.DefineMockAsset(AssetType.Script, 125, "global_func_AnotherFunction");
         gameContext.DefineMockAsset(AssetType.Script, 123, "ExampleFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("ExampleFunction", new Underanalyzer.Mock.GMFunction("ExampleFunction"));
+            .DefineFunction("ExampleFunction", new GMFunction("ExampleFunction"));
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("AnotherFunction", new Underanalyzer.Mock.GMFunction("global_func_AnotherFunction"));
-        ((Underanalyzer.Mock.BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
+            .DefineFunction("AnotherFunction", new GMFunction("global_func_AnotherFunction"));
+        ((BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
             new("script_execute", 0, int.MaxValue);
         TestUtil.AssertBytecode(
             """
@@ -1676,7 +1892,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionReferencesRegularExtraModern()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingAssetReferences = true,
             UsingSelfToBuiltin = true,
@@ -1689,10 +1905,10 @@ public class BytecodeContext_GenerateCode
         gameContext.DefineMockAsset(AssetType.Script, 125, "global_func_AnotherFunction");
         gameContext.DefineMockAsset(AssetType.Script, 123, "ExampleFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("ExampleFunction", new Underanalyzer.Mock.GMFunction("ExampleFunction"));
+            .DefineFunction("ExampleFunction", new GMFunction("ExampleFunction"));
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("AnotherFunction", new Underanalyzer.Mock.GMFunction("global_func_AnotherFunction"));
-        ((Underanalyzer.Mock.BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
+            .DefineFunction("AnotherFunction", new GMFunction("global_func_AnotherFunction"));
+        ((BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
             new("script_execute", 0, int.MaxValue);
         TestUtil.AssertBytecode(
             """
@@ -1769,7 +1985,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionReferencesEarlyGMLv2()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingAssetReferences = false
         };
@@ -1777,10 +1993,10 @@ public class BytecodeContext_GenerateCode
         gameContext.DefineMockAsset(AssetType.Script, 125, "global_func_AnotherFunction");
         gameContext.DefineMockAsset(AssetType.Script, 123, "ExampleFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("ExampleFunction", new Underanalyzer.Mock.GMFunction("ExampleFunction"));
+            .DefineFunction("ExampleFunction", new GMFunction("ExampleFunction"));
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("AnotherFunction", new Underanalyzer.Mock.GMFunction("global_func_AnotherFunction"));
-        ((Underanalyzer.Mock.BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
+            .DefineFunction("AnotherFunction", new GMFunction("global_func_AnotherFunction"));
+        ((BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
             new("script_execute", 0, int.MaxValue);
         TestUtil.AssertBytecode(
             """
@@ -1827,7 +2043,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionReferencesRegularEarlyGMLv2()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingAssetReferences = false
         };
@@ -1835,10 +2051,10 @@ public class BytecodeContext_GenerateCode
         gameContext.DefineMockAsset(AssetType.Script, 125, "global_func_AnotherFunction");
         gameContext.DefineMockAsset(AssetType.Script, 123, "ExampleFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("ExampleFunction", new Underanalyzer.Mock.GMFunction("ExampleFunction"));
+            .DefineFunction("ExampleFunction", new GMFunction("ExampleFunction"));
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("AnotherFunction", new Underanalyzer.Mock.GMFunction("global_func_AnotherFunction"));
-        ((Underanalyzer.Mock.BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
+            .DefineFunction("AnotherFunction", new GMFunction("global_func_AnotherFunction"));
+        ((BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
             new("script_execute", 0, int.MaxValue);
         TestUtil.AssertBytecode(
             """
@@ -1885,14 +2101,14 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionReferencesPreGMLv2()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingAssetReferences = false,
             UsingGMLv2 = false
         };
         gameContext.DefineMockAsset(AssetType.Script, 123, "ExampleFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContext.GlobalFunctions)
-            .DefineFunction("ExampleFunction", new Underanalyzer.Mock.GMFunction("ExampleFunction"));
+            .DefineFunction("ExampleFunction", new GMFunction("ExampleFunction"));
         TestUtil.AssertBytecode(
             """
             a = ExampleFunction;
@@ -1909,12 +2125,12 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionReferencesErrorPreGMLv2()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingAssetReferences = false,
             UsingGMLv2 = false
         };
-        ((Underanalyzer.Mock.BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
+        ((BuiltinsMock)gameContext.Builtins).BuiltinFunctions["script_execute"] =
             new("script_execute", 0, int.MaxValue);
         Assert.Throws<TestCompileErrorException>(() =>
         {
@@ -2271,7 +2487,7 @@ public class BytecodeContext_GenerateCode
             popz.i
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingExtraRepeatInstruction = true
             }
@@ -2412,7 +2628,7 @@ public class BytecodeContext_GenerateCode
             :[7]
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingBetterTryBreakContinue = true,
                 UsingSelfToBuiltin = true
@@ -2559,7 +2775,7 @@ public class BytecodeContext_GenerateCode
             popz.i
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingExtraRepeatInstruction = true
             }
@@ -2708,7 +2924,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestAssetArray()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = false,
             UsingAssetReferences = false
@@ -2732,7 +2948,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestArgumentsOld()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingSelfToBuiltin = false
         };
@@ -2802,7 +3018,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestArguments()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingSelfToBuiltin = true
         };
@@ -2872,7 +3088,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestStruct()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingSelfToBuiltin = true,
             UsingNewFunctionVariables = true
@@ -2931,7 +3147,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestRoomInstances()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingSelfToBuiltin = true
         };
@@ -2999,7 +3215,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestNewRepeatGeneration()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingSelfToBuiltin = true,
             UsingExtraRepeatInstruction = false
@@ -3047,7 +3263,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestConstantConflicts()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingAssetReferences = false
         };
@@ -3123,7 +3339,7 @@ public class BytecodeContext_GenerateCode
                 """,
                 "",
                 false,
-                new Underanalyzer.Mock.GameContextMock()
+                new GameContextMock()
                 {
                     UsingGMLv2 = false
                 }
@@ -3143,7 +3359,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i [stacktop]self.id
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingGMLv2 = true
             }
@@ -3165,7 +3381,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingGMLv2 = false
             }
@@ -3187,7 +3403,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingGMLv2 = true
             }
@@ -3199,9 +3415,33 @@ public class BytecodeContext_GenerateCode
     {
         TestUtil.AssertBytecode(
             """
+            arr[123]++;
+            self.arr[123]++;
+            other.arr[123]++;
             global.arr[123]++;
             """,
             """
+            pushi.e -1
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            pushi.e -1
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            pushi.e -2
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
             pushi.e -5
             pushi.e 123
             dup.i 1
@@ -3211,7 +3451,7 @@ public class BytecodeContext_GenerateCode
             pop.i.v [array]global.arr
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 Bytecode14OrLower = true,
                 UsingGMLv2 = false
@@ -3224,9 +3464,33 @@ public class BytecodeContext_GenerateCode
     {
         TestUtil.AssertBytecode(
             """
+            arr[123]++;
+            self.arr[123]++;
+            other.arr[123]++;
             global.arr[123]++;
             """,
             """
+            pushi.e -1
+            pushi.e 123
+            dup.l 0
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            pushi.e -1
+            pushi.e 123
+            dup.l 0
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            pushi.e -2
+            pushi.e 123
+            dup.l 0
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
             pushi.e -5
             pushi.e 123
             dup.l 0
@@ -3236,7 +3500,7 @@ public class BytecodeContext_GenerateCode
             pop.i.v [array]global.arr
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 Bytecode14OrLower = false,
                 UsingGMLv2 = false
@@ -3249,9 +3513,35 @@ public class BytecodeContext_GenerateCode
     {
         TestUtil.AssertBytecode(
             """
+            arr[123]++;
+            self.arr[123]++;
+            other.arr[123]++;
             global.arr[123]++;
             """,
             """
+            pushi.e -1
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            call.i @@This@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            call.i @@Other@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
             pushi.e -5
             pushi.e 123
             dup.i 1
@@ -3261,10 +3551,352 @@ public class BytecodeContext_GenerateCode
             pop.i.v [array]global.arr
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 Bytecode14OrLower = false,
                 UsingGMLv2 = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestArrayIncrementNewArrayOwners()
+    {
+        TestUtil.AssertBytecode(
+            """
+            arr[123]++;
+            self.arr[123]++;
+            other.arr[123]++;
+            global.arr[123]++;
+            """,
+            """
+            push.i 165536
+            setowner.e
+            pushi.e -1
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 6
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            push.i 231072
+            setowner.e
+            call.i @@This@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 10
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            call.i @@Other@@ 0
+            pushi.e -9
+            pushi.e 123
+            push.v [array]self.arr
+            popz.v
+            call.i @@Other@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 10
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            pushi.e -5
+            pushi.e 123
+            push.v [array]self.arr
+            popz.v
+            pushi.e -5
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 6
+            push.e 1
+            add.i.v
+            pop.i.v [array]global.arr
+            popz.v
+            """,
+            false,
+            new GameContextMock()
+            {
+                Bytecode14OrLower = false,
+                UsingGMLv2 = true,
+                UsingArrayCopyOnWrite = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestArrayIncrementEvenNewer()
+    {
+        TestUtil.AssertBytecode(
+            """
+            arr[123]++;
+            self.arr[123]++;
+            other.arr[123]++;
+            global.arr[123]++;
+            """,
+            """
+            pushi.e -1
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            pushi.e -1
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            pushi.e -2
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            call.i @@Global@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]global.arr
+            """,
+            false,
+            new GameContextMock()
+            {
+                Bytecode14OrLower = false,
+                UsingGMLv2 = true,
+                UsingGlobalConstantFunction = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestArrayIncrementEvenNewerArrayOwners()
+    {
+        TestUtil.AssertBytecode(
+            """
+            arr[123]++;
+            self.arr[123]++;
+            other.arr[123]++;
+            global.arr[123]++;
+            """,
+            """
+            push.i 165536
+            setowner.e
+            pushi.e -1
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 6
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            push.i 231072
+            setowner.e
+            pushi.e -1
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 6
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            pushi.e -2
+            pushi.e 123
+            push.v [array]self.arr
+            popz.v
+            pushi.e -2
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 6
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            call.i @@Global@@ 0
+            pushi.e -9
+            pushi.e 123
+            push.v [array]self.arr
+            popz.v
+            call.i @@Global@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 10
+            push.e 1
+            add.i.v
+            pop.i.v [array]global.arr
+            popz.v
+            """,
+            false,
+            new GameContextMock()
+            {
+                Bytecode14OrLower = false,
+                UsingGMLv2 = true,
+                UsingArrayCopyOnWrite = true,
+                UsingNewArrayOwners = true,
+                UsingGlobalConstantFunction = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestArrayIncrementEvenNewerer()
+    {
+        TestUtil.AssertBytecode(
+            """
+            arr[123]++;
+            self.arr[123]++;
+            other.arr[123]++;
+            global.arr[123]++;
+            """,
+            """
+            pushi.e -6
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            call.i @@This@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            call.i @@Other@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            call.i @@Global@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            push.e 1
+            add.i.v
+            pop.i.v [array]global.arr
+            """,
+            false,
+            new GameContextMock()
+            {
+                Bytecode14OrLower = false,
+                UsingGMLv2 = true,
+                UsingGlobalConstantFunction = true,
+                UsingSelfToBuiltin = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestArrayIncrementEvenNewererArrayOwners()
+    {
+        TestUtil.AssertBytecode(
+            """
+            arr[123]++;
+            self.arr[123]++;
+            other.arr[123]++;
+            global.arr[123]++;
+            """,
+            """
+            push.i 165536
+            setowner.e
+            pushi.e -6
+            pushi.e 123
+            dup.i 1
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 6
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            push.i 231072
+            setowner.e
+            call.i @@This@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 10
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            call.i @@Other@@ 0
+            pushi.e -9
+            pushi.e 123
+            push.v [array]self.arr
+            popz.v
+            call.i @@Other@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 10
+            push.e 1
+            add.i.v
+            pop.i.v [array]self.arr
+            popz.v
+            call.i @@Global@@ 0
+            pushi.e -9
+            pushi.e 123
+            push.v [array]self.arr
+            popz.v
+            call.i @@Global@@ 0
+            pushi.e -9
+            pushi.e 123
+            dup.i 5
+            push.v [array]self.arr
+            dup.v 0
+            dup.i 4 10
+            push.e 1
+            add.i.v
+            pop.i.v [array]global.arr
+            popz.v
+            """,
+            false,
+            new GameContextMock()
+            {
+                Bytecode14OrLower = false,
+                UsingGMLv2 = true,
+                UsingArrayCopyOnWrite = true,
+                UsingNewArrayOwners = true,
+                UsingGlobalConstantFunction = true,
+                UsingSelfToBuiltin = true
             }
         );
     }
@@ -3282,7 +3914,7 @@ public class BytecodeContext_GenerateCode
                 """,
                 "",
                 false,
-                new Underanalyzer.Mock.GameContextMock()
+                new GameContextMock()
                 {
                     UsingGMLv2 = false
                 }
@@ -3317,7 +3949,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i self.d
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingStringRealOptimizations = false,
                 UsingGMLv2 = false
@@ -3344,7 +3976,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v [array]self.c
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingGMLv2 = false
             }
@@ -3366,7 +3998,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingLongCompoundBitwise = false
             }
@@ -3388,7 +4020,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingLongCompoundBitwise = true
             }
@@ -3481,7 +4113,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestNullishErrors()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingNullishOperator = false
         };
@@ -3501,7 +4133,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestNullishErrors2()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingNullishOperator = false
         };
@@ -3521,7 +4153,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestMultiDimensionalErrors()
     {
-        Underanalyzer.Mock.GameContextMock gameContext = new()
+        GameContextMock gameContext = new()
         {
             UsingGMLv2 = false
         };
@@ -3969,7 +4601,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingArrayCopyOnWrite = true,
                 UsingNewArrayOwners = true
@@ -4050,7 +4682,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v [array]self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingArrayCopyOnWrite = true,
                 UsingNewArrayOwners = true
@@ -4136,7 +4768,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingArrayCopyOnWrite = true,
                 UsingNewArrayOwners = true
@@ -4167,7 +4799,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingArrayCopyOnWrite = true,
                 UsingNewArrayOwners = true
@@ -4200,7 +4832,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingArrayCopyOnWrite = true,
                 UsingNewArrayOwners = true
@@ -4247,7 +4879,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i [stacktop]self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingArrayCopyOnWrite = true,
                 UsingNewArrayOwners = true
@@ -4300,7 +4932,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingAssetReferences = false,
                 UsingRoomInstanceReferences = false
@@ -4320,7 +4952,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingAssetReferences = true,
                 UsingRoomInstanceReferences = false
@@ -4340,7 +4972,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v self.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingAssetReferences = true,
                 UsingRoomInstanceReferences = true
@@ -4380,7 +5012,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewFunctionVariables = true,
@@ -4437,7 +5069,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             true,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewFunctionVariables = true,
@@ -4510,7 +5142,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             true,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewFunctionVariables = true,
@@ -4523,7 +5155,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionScriptReferencesGlobalScript()
     {
-        Underanalyzer.Mock.GameContextMock gameContextMock = new()
+        GameContextMock gameContextMock = new()
         {
             UsingSelfToBuiltin = true,
             UsingNewFunctionVariables = true,
@@ -4533,10 +5165,10 @@ public class BytecodeContext_GenerateCode
         };
         gameContextMock.DefineMockAsset(AssetType.Script, 123, "DifferentScript");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContextMock.GlobalFunctions).
-            DefineFunction("DifferentScript", new Underanalyzer.Mock.GMFunction("DifferentScript"));
+            DefineFunction("DifferentScript", new GMFunction("DifferentScript"));
         gameContextMock.DefineMockAsset(AssetType.Script, 124, "global_func_DifferentScript_SubFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContextMock.GlobalFunctions).
-            DefineFunction("DifferentScript_SubFunction", new Underanalyzer.Mock.GMFunction("global_func_DifferentScript_SubFunction"));
+            DefineFunction("DifferentScript_SubFunction", new GMFunction("global_func_DifferentScript_SubFunction"));
         TestUtil.AssertBytecode(
             """
             a = SameScript;
@@ -4947,7 +5579,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionScriptReferencesObjectEvent()
     {
-        Underanalyzer.Mock.GameContextMock gameContextMock = new()
+        GameContextMock gameContextMock = new()
         {
             UsingSelfToBuiltin = true,
             UsingNewFunctionVariables = true,
@@ -4957,10 +5589,10 @@ public class BytecodeContext_GenerateCode
         };
         gameContextMock.DefineMockAsset(AssetType.Script, 123, "DifferentScript");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContextMock.GlobalFunctions).
-            DefineFunction("DifferentScript", new Underanalyzer.Mock.GMFunction("DifferentScript"));
+            DefineFunction("DifferentScript", new GMFunction("DifferentScript"));
         gameContextMock.DefineMockAsset(AssetType.Script, 124, "global_func_DifferentScript_SubFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContextMock.GlobalFunctions).
-            DefineFunction("DifferentScript_SubFunction", new Underanalyzer.Mock.GMFunction("global_func_DifferentScript_SubFunction"));
+            DefineFunction("DifferentScript_SubFunction", new GMFunction("global_func_DifferentScript_SubFunction"));
         TestUtil.AssertBytecode(
             """
             a = SameEvent;
@@ -5373,7 +6005,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionScriptReferencesNewGlobalScript()
     {
-        Underanalyzer.Mock.GameContextMock gameContextMock = new()
+        GameContextMock gameContextMock = new()
         {
             UsingSelfToBuiltin = true,
             UsingNewFunctionVariables = true,
@@ -5384,10 +6016,10 @@ public class BytecodeContext_GenerateCode
         };
         gameContextMock.DefineMockAsset(AssetType.Script, 123, "DifferentScript");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContextMock.GlobalFunctions).
-            DefineFunction("DifferentScript", new Underanalyzer.Mock.GMFunction("DifferentScript"));
+            DefineFunction("DifferentScript", new GMFunction("DifferentScript"));
         gameContextMock.DefineMockAsset(AssetType.Script, 124, "global_func_DifferentScript_SubFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContextMock.GlobalFunctions).
-            DefineFunction("DifferentScript_SubFunction", new Underanalyzer.Mock.GMFunction("global_func_DifferentScript_SubFunction"));
+            DefineFunction("DifferentScript_SubFunction", new GMFunction("global_func_DifferentScript_SubFunction"));
         TestUtil.AssertBytecode(
             """
             a = SameScript;
@@ -5792,7 +6424,7 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestFunctionScriptReferencesNewObjectEvent()
     {
-        Underanalyzer.Mock.GameContextMock gameContextMock = new()
+        GameContextMock gameContextMock = new()
         {
             UsingSelfToBuiltin = true,
             UsingNewFunctionVariables = true,
@@ -5803,10 +6435,10 @@ public class BytecodeContext_GenerateCode
         };
         gameContextMock.DefineMockAsset(AssetType.Script, 123, "DifferentScript");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContextMock.GlobalFunctions).
-            DefineFunction("DifferentScript", new Underanalyzer.Mock.GMFunction("DifferentScript"));
+            DefineFunction("DifferentScript", new GMFunction("DifferentScript"));
         gameContextMock.DefineMockAsset(AssetType.Script, 124, "global_func_DifferentScript_SubFunction");
         ((Underanalyzer.Decompiler.GlobalFunctions)gameContextMock.GlobalFunctions).
-            DefineFunction("DifferentScript_SubFunction", new Underanalyzer.Mock.GMFunction("global_func_DifferentScript_SubFunction"));
+            DefineFunction("DifferentScript_SubFunction", new GMFunction("global_func_DifferentScript_SubFunction"));
         TestUtil.AssertBytecode(
             """
             a = SameEvent;
@@ -6264,7 +6896,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewFunctionVariables = true,
@@ -6331,7 +6963,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewFunctionVariables = true,
@@ -6413,7 +7045,7 @@ public class BytecodeContext_GenerateCode
             pop.v.i builtin.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingBuiltinDefaultArguments = true,
@@ -6452,7 +7084,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingAssetReferences = true,
                 UsingRoomInstanceReferences = false
@@ -6485,7 +7117,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingAssetReferences = true,
                 UsingRoomInstanceReferences = true
@@ -6505,7 +7137,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v builtin.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingOptimizedFunctionDeclarations = true,
                 UsingSelfToBuiltin = true
@@ -6655,7 +7287,7 @@ public class BytecodeContext_GenerateCode
             pop.v.v builtin.a
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingConstructorSetStatic = true,
@@ -6667,8 +7299,8 @@ public class BytecodeContext_GenerateCode
     [Fact]
     public void TestInternalFunction()
     {
-        Underanalyzer.Mock.GameContextMock context = new();
-        ((Underanalyzer.Mock.BuiltinsMock)context.Builtins)
+        GameContextMock context = new();
+        ((BuiltinsMock)context.Builtins)
             .BuiltinFunctions["@@internal_function_test@@"] = new("@@internal_function_test@@", 0, 0);
         TestUtil.AssertBytecode(
             """
@@ -6708,7 +7340,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewChainedFunctionArgumentOrder = false
@@ -6748,7 +7380,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewChainedFunctionArgumentOrder = false
@@ -6782,7 +7414,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewChainedFunctionArgumentOrder = true
@@ -6824,7 +7456,7 @@ public class BytecodeContext_GenerateCode
             popz.v
             """,
             false,
-            new Underanalyzer.Mock.GameContextMock()
+            new GameContextMock()
             {
                 UsingSelfToBuiltin = true,
                 UsingNewChainedFunctionArgumentOrder = true

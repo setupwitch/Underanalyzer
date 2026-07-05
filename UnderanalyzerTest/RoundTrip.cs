@@ -915,8 +915,88 @@ public class RoundTrip
             """
         );
     }
+
     [Fact]
     public void TestNonSelfToBuiltin()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            a = 0;
+            self.a = 0;
+            a = b;
+            a = self.b;
+            a += 1;
+            self.a += 1;
+            a++;
+            self.a++;
+            a.b = 0;
+            a[0] = 1;
+            self.a[0] = 1;
+            a.b[0] = 1;
+            a[0] += 1;
+            self.a[0] += 1;
+            a.b[0] += 1;
+            a = a[0];
+            a = self.a[0];
+            a = a.b[0];
+            global.a = 0;
+            global.a[0] = 0;
+            self.a.b = 1;
+            a.b = 1;
+            a = 1;
+            other.a[0] = 1;
+            global.a[0] = 1;
+            a[0].b = 1;
+            a = a[0].b;
+            a = a[0];
+            a[0].b[0]("a");
+            a[0].b.c("a");
+            a[0].b("a");
+            """,
+            """
+            a = 0;
+            a = 0;
+            a = b;
+            a = b;
+            a += 1;
+            a += 1;
+            a++;
+            a++;
+            a.b = 0;
+            a[0] = 1;
+            self.a[0] = 1;
+            a.b[0] = 1;
+            a[0] += 1;
+            self.a[0] += 1;
+            a.b[0] += 1;
+            a = a[0];
+            a = self.a[0];
+            a = a.b[0];
+            global.a = 0;
+            global.a[0] = 0;
+            a.b = 1;
+            a.b = 1;
+            a = 1;
+            other.a[0] = 1;
+            global.a[0] = 1;
+            a[0].b = 1;
+            a = a[0].b;
+            a = a[0];
+            a[0].b[0]("a");
+            a[0].b.c("a");
+            a[0].b("a");
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = false,
+                UsingGlobalConstantFunction = false
+            }
+        );
+    }
+
+    [Fact]
+    public void TestNonSelfToBuiltin2()
     {
         TestUtil.VerifyRoundTrip(
             """
@@ -984,7 +1064,13 @@ public class RoundTrip
             a[0].b[0]("a");
             a[0].b.c("a");
             a[0].b("a");
-            """
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = false,
+                UsingGlobalConstantFunction = true
+            }
         );
     }
 
