@@ -507,9 +507,12 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
         context.CurrentScope = Scope;
 
         // Update array owner IDs if necessary
+        long prevArrayOwnerId = -1;
         if (context.CompileContext.GameContext.UsingArrayCopyOnWrite)
         {
             Scope.ArrayOwnerID = ++context.LastFunctionID;
+            prevArrayOwnerId = context.LastArrayOwnerID;
+            context.LastArrayOwnerID = -1;
         }
 
         // Skip past function body
@@ -584,6 +587,7 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
         }
 
         // Static block, before main body
+        long beforeStaticBlockArrayOwnerId = context.LastArrayOwnerID;
         if (Scope.StaticInitializerBlock is BlockNode staticBlock)
         {
             // If static has already initialized, branch past this block
@@ -607,6 +611,12 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
             if (allowReentrantStatic)
             {
                 context.Emit(ExtendedOpcode.SetStaticInitialized);
+            }
+
+            // Reset array owner ID if needed
+            if (context.LastArrayOwnerID != beforeStaticBlockArrayOwnerId)
+            {
+                context.LastArrayOwnerID = -1;
             }
         }
 
@@ -691,6 +701,9 @@ internal sealed class FunctionDeclNode : IMaybeStatementASTNode
             // This is not a statement, so result from method() is still on the stack
             context.PushDataType(DataType.Variable);
         }
+
+        // Reset the array owner ID to what it was beforehand
+        context.LastArrayOwnerID = prevArrayOwnerId;
     }
 
     /// <inheritdoc/>

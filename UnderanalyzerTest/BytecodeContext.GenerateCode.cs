@@ -7463,4 +7463,63 @@ public class BytecodeContext_GenerateCode
             }
         );
     }
+
+    [Fact]
+    public void TestArrayOwnerFunctionInterrupted()
+    {
+        TestUtil.AssertBytecode(
+            """
+            a[0] = 123;
+            
+            function test()
+            {
+                b[0] = 456;
+            }
+
+            a[0] = 789;
+            """,
+            """
+            push.i 165536
+            setowner.e
+            pushi.e 123
+            conv.i.v
+            pushi.e -1
+            pushi.e 0
+            pop.v.v [array]self.a
+            b [2]
+
+            > global_func_test (locals=0, args=0)
+            :[1]
+            push.i 231073
+            setowner.e
+            pushi.e 456
+            conv.i.v
+            pushi.e -1
+            pushi.e 0
+            pop.v.v [array]self.b
+            exit.i
+
+            :[2]
+            push.i [function]global_func_test
+            conv.i.v
+            pushi.e -1
+            conv.i.v
+            call.i method 2
+            dup.v 0
+            pushi.e -6
+            pop.v.v [stacktop]self.test
+            popz.v
+            pushi.e 789
+            conv.i.v
+            pushi.e -1
+            pushi.e 0
+            pop.v.v [array]self.a
+            """,
+            true,
+            new GameContextMock()
+            {
+                UsingArrayCopyOnWrite = true
+            }
+        );
+    }
 }
