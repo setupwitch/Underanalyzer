@@ -3782,4 +3782,54 @@ public class RoundTrip
             """
         );
     }
+
+    [Fact]
+    public void TestBitwiseSpecialCase()
+    {
+        TestUtil.VerifyRoundTripAssembly(
+            """
+            a |= b;
+            a = a | b;
+            a &= b;
+            a = a & b;
+            a ^= b;
+            a = a ^ b;
+            """,
+            """
+            push.v self.a
+            push.v self.b
+            conv.v.l
+            or.l.v
+            pop.v.v self.a
+            push.v self.a
+            conv.v.l
+            push.v self.b
+            conv.v.l
+            or.l.l
+            pop.v.l self.a
+            push.v self.a
+            push.v self.b
+            conv.v.l
+            and.l.v
+            pop.v.v self.a
+            push.v self.a
+            conv.v.l
+            push.v self.b
+            conv.v.l
+            and.l.l
+            pop.v.l self.a
+            push.v self.a
+            push.v self.b
+            conv.v.l
+            xor.l.v
+            pop.v.v self.a
+            push.v self.a
+            conv.v.l
+            push.v self.b
+            conv.v.l
+            xor.l.l
+            pop.v.l self.a
+            """
+        );
+    }
 }
