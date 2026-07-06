@@ -109,6 +109,13 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
             Right.Group = true;
         }
 
+        // Check for a special case of grouping on Left, with division of an integer type (caused by boolean conversions)
+        if (Instruction is { Kind: Opcode.Divide, Type1: DataType.Double, Type2: DataType.Int32 } &&
+            Left is BinaryNode { Instruction.Kind: Opcode.Multiply })
+        {
+            Left.Group = false;
+        }
+
         return this;
     }
 

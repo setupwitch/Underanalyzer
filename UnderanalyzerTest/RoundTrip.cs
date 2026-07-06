@@ -3744,4 +3744,42 @@ public class RoundTrip
             }
         );
     }
+
+    [Fact]
+    public void TestDivisionSpecialCase()
+    {
+        TestUtil.VerifyRoundTripAssembly(
+            """
+            a = 2 * (3 + !b) / 4;
+            c = (5 * (6 + !d)) / 7;
+            """,
+            """
+            pushi.e 2
+            pushi.e 3
+            push.v self.b
+            conv.v.b
+            not.b
+            conv.b.i
+            add.i.i
+            mul.i.i
+            pushi.e 4
+            conv.i.d
+            div.d.i
+            pop.v.d self.a
+            pushi.e 5
+            pushi.e 6
+            push.v self.d
+            conv.v.b
+            not.b
+            conv.b.i
+            add.i.i
+            mul.i.i
+            conv.i.d
+            pushi.e 7
+            conv.i.d
+            div.d.d
+            pop.v.d self.c
+            """
+        );
+    }
 }
