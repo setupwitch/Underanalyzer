@@ -3464,6 +3464,27 @@ public class RoundTrip
     }
 
     [Fact]
+    public void TestStandaloneStruct4b()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a) {
+                ({
+                    b: 123
+                });
+            }
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true,
+                OpenBlockBraceOnSameLine = true
+            }
+        );
+    }
+
+    [Fact]
     public void TestStandaloneStruct5()
     {
         TestUtil.VerifyRoundTripAssembly(
@@ -3509,6 +3530,42 @@ public class RoundTrip
                 UsingOptimizedFunctionDeclarations = true,
                 UsingSelfToBuiltin = true
             },
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestNonRoomInstanceParentheses()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+                a.b = 123;
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestRoomInstanceParentheses()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+            {
+                (101234).abc = 789;
+            }
+            """,
+            false,
+            null,
             new Underanalyzer.Decompiler.DecompileSettings()
             {
                 RemoveSingleLineBlockBraces = true
