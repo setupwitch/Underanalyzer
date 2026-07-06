@@ -3572,4 +3572,37 @@ public class RoundTrip
             }
         );
     }
+
+    [Fact]
+    public void TestBinaryParentheses()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            if (a)
+                0(123, 456);
+            if (b)
+            {
+                (c + d)(789);
+            }
+            if (e)
+            {
+                (function()
+                {
+                })(123, 456);
+            }
+            if (f)
+            {
+                (function()
+                {
+                } + 1)(123, 456);
+            }
+            """,
+            false,
+            null,
+            new Underanalyzer.Decompiler.DecompileSettings()
+            {
+                RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
 }

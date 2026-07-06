@@ -167,7 +167,11 @@ public class BinaryNode : IMultiExpressionNode, IMacroResolvableNode, ICondition
     /// <inheritdoc/>
     public bool RequiresMultipleLines(ASTPrinter printer, bool isStatementLHS)
     {
-        return Left.RequiresMultipleLines(printer, false) || Right.RequiresMultipleLines(printer, false);
+        if (isStatementLHS && Group)
+        {
+            return true;
+        }
+        return Left.RequiresMultipleLines(printer, isStatementLHS) || Right.RequiresMultipleLines(printer, false);
     }
 
     /// <inheritdoc/>
