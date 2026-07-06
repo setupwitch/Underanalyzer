@@ -3538,6 +3538,40 @@ public class RoundTrip
     }
 
     [Fact]
+    public void TestStandaloneStruct7()
+    {
+        TestUtil.VerifyRoundTrip(
+            """
+            (
+            {
+                a: -4
+            }
+            );
+            (
+            {
+                a: noone
+            }
+            );
+            (
+            {
+                ";": 123
+            }
+            );
+            (
+            {
+                "hello world": 456
+            }
+            );
+            """,
+            false,
+            new GameContextMock()
+            {
+                UsingStructAnyNonemptyString = true
+            }
+        );
+    }
+
+    [Fact]
     public void TestNonRoomInstanceParentheses()
     {
         TestUtil.VerifyRoundTrip(
@@ -3602,6 +3636,111 @@ public class RoundTrip
             new Underanalyzer.Decompiler.DecompileSettings()
             {
                 RemoveSingleLineBlockBraces = true
+            }
+        );
+    }
+
+    [Fact]
+    public void TestStructHoisting()
+    {
+        TestUtil.VerifyRoundTripAssembly(
+            """
+            a = 
+            {
+                b: noone
+            };
+            c = 
+            {
+                d: -4
+            };
+            e = 
+            {
+                f: 4,
+                g: 4.5,
+                h: -4.5,
+                i: -1234
+            };
+            """,
+            """
+            b [2]
+
+            > struct_func___struct__1 (locals=0, ars=0)
+            :[1]
+            call.i @@SetStatic@@ 0
+            pushi.e -4
+            pop.v.i self.b
+            exit.i
+
+            :[2]
+            push.i [function]struct_func___struct__1
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__1
+            call.i @@NewGMLObject@@ 1
+            pop.v.v builtin.a
+            pushi.e -4
+            conv.i.v
+            b [4]
+
+            > struct_func___struct__2 (locals=0, args=0)
+            :[3]
+            call.i @@SetStatic@@ 0
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.d
+            exit.i
+
+            :[4]
+            push.i [function]struct_func___struct__2
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__2
+            call.i @@NewGMLObject@@ 2
+            pop.v.v builtin.c
+            pushi.e -1234
+            conv.i.v
+            push.d -4.5
+            conv.d.v
+            b [6]
+
+            > struct_func___struct__3 (locals=0, args=0)
+            :[5]
+            call.i @@SetStatic@@ 0
+            pushi.e 4
+            pop.v.i self.f
+            push.d 4.5
+            pop.v.d self.g
+            pushi.e -15
+            pushi.e 0
+            push.v [array]self.argument
+            pop.v.v self.h
+            pushi.e -15
+            pushi.e 1
+            push.v [array]self.argument
+            pop.v.v self.i
+            exit.i
+
+            :[6]
+            push.i [function]struct_func___struct__3
+            conv.i.v
+            call.i @@NullObject@@ 0
+            call.i method 2
+            dup.v 0
+            pop.v.v global.__struct__3
+            call.i @@NewGMLObject@@ 3
+            pop.v.v builtin.e
+            """,
+            true,
+            new GameContextMock()
+            {
+                UsingSelfToBuiltin = true,
+                UsingConstructorSetStatic = true,
+                UsingOptimizedFunctionDeclarations = true
             }
         );
     }

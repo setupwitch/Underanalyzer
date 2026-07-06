@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Underanalyzer.Compiler;
 using Underanalyzer.Decompiler;
 using Underanalyzer.Decompiler.GameSpecific;
@@ -205,5 +206,22 @@ public class GameContextMock : IGameContext
     public bool GetScriptIdByFunctionName(string functionName, out int assetId)
     {
         return _mockScriptsByName.TryGetValue($"global_func_{functionName}", out assetId);
+    }
+
+    /// <inheritdoc/>
+    public bool LookupCommonNegativeConstant(int value, [NotNullWhen(true)] out string? name)
+    {
+        if (value == -3)
+        {
+            name = "all";
+            return true;
+        }
+        if (value == -4)
+        {
+            name = "noone";
+            return true;
+        }
+        name = null;
+        return false;
     }
 }

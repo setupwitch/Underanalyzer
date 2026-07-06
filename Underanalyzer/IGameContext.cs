@@ -4,6 +4,7 @@
   file, You can obtain one at https://mozilla.org/MPL/2.0/.
 */
 
+using System.Diagnostics.CodeAnalysis;
 using Underanalyzer.Compiler;
 using Underanalyzer.Decompiler;
 using Underanalyzer.Decompiler.GameSpecific;
@@ -315,4 +316,15 @@ public interface IGameContext
     /// <param name="assetId">Outputs the asset ID, or is undefined if this method returns <see langword="false"/>.</param>
     /// <returns><see langword="true"/> if an asset ID for the script name was found; <see langword="false"/> otherwise.</returns>
     public bool GetScriptIdByFunctionName(string functionName, out int assetId);
+
+    /// <summary>
+    /// Looks up a commonly-used constant by its negative integer value (as in, the constant must have a negative integer value).
+    /// </summary>
+    /// <remarks>
+    /// This is mainly intended for constants such as "all" (-3) or "noone" (-4), when used inside of structs, when decompiling.
+    /// </remarks>
+    /// <param name="value">Negative integer value of the constant to look up.</param>
+    /// <param name="name">Outputs the constant name if lookup was successful; otherwise <see langword="null"/>.</param>
+    /// <returns><see langword="true"/> if a constant name was found; <see langword="false"/> otherwise.</returns>
+    public bool LookupCommonNegativeConstant(int value, [NotNullWhen(true)] out string? name);
 }
