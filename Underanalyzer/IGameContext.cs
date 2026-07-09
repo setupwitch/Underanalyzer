@@ -29,7 +29,8 @@ public enum AssetType
     Sequence,
     AnimCurve,
     ParticleSystem,
-    RoomInstance
+    RoomInstance,
+    AudioGroup
 }
 
 /// <summary>
