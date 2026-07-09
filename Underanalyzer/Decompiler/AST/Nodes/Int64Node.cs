@@ -38,6 +38,12 @@ public class Int64Node(long value) : IConstantNode<long>, IMacroResolvableNode, 
         // If we aren't detected as an enum yet, and we're within signed 32-bit range, we assume this is an unknown enum
         if (Value >= int.MinValue && Value <= int.MaxValue)
         {
+            // lazy fix
+            if (cleaner.Context.Settings.BitwiseOperationForEnums)
+            {
+                return new MacroValueNode($"({Value} << 0)");
+            }
+            
             // Check if we have an unknown enum name to use (if null, we don't generate/use one at all)
             string unknownEnumName = cleaner.Context.Settings.UnknownEnumName;
             if (unknownEnumName is not null)
