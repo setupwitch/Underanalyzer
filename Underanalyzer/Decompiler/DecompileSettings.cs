@@ -148,7 +148,12 @@ public interface IDecompileSettings
     /// Format string for any arguments with an unknown name, in GMLv2 functions.
     /// </summary>
     public string UnknownArgumentNamePattern { get; }
-
+    
+    /// <summary>
+    /// Format Unknown enums like old UndertaleModTool. (e.g. '(7 << 0)')
+    /// </summary>
+    public bool BitwiseOperationForEnums { get; }
+    
     /// <summary>
     /// Whether leftover data on the simulated VM stack will be allowed in decompilation output. 
     /// If false, an exception is thrown when data is left over on the stack at the end of a fragment.
@@ -196,6 +201,8 @@ public class DecompileSettings : IDecompileSettings
     public string UnknownEnumValuePattern { get; set; } = "Value_{0}";
     public string UnknownArgumentNamePattern { get; set; } = "arg{0}";
     public bool AllowLeftoverDataOnStack { get; set; } = true;
+    
+    public bool BitwiseOperationForEnums { get; set; } = false;
 
     // Some basic data populated from code seen in the wild
     // TODO: populate this with more values by default?
